@@ -1,0 +1,143 @@
+{
+  "locations": [
+    {
+      "id": "2",
+      "locationName": "asda",
+      "latitude": 35.89585209682725,
+      "longitude": 128.62188633531332,
+      "radius": 284
+    },
+    {
+      "id": "efe9",
+      "locationName": "aaaa",
+      "latitude": 35.89585209682725,
+      "longitude": 128.62188633531332,
+      "radius": 26
+    },
+    {
+      "id": "66ea",
+      "locationName": "",
+      "latitude": 35.88119293094168,
+      "longitude": 128.62284924834967,
+      "radius": 31
+    },
+    {
+      "id": "2023",
+      "locationName": "",
+      "latitude": 35.89037369785294,
+      "longitude": 128.6196493729949,
+      "radius": 277
+    }
+  ],
+  "notifications": [
+    {
+      "id": 1,
+      "sender": "Kim",
+      "content": "Dinner at 8",
+      "isRead": false
+    },
+    {
+      "id": 2,
+      "sender": "Sender 2",
+      "content": "Content of the alarm 2",
+      "isRead": true
+    },
+    {
+      "id": 3,
+      "sender": "Sender 3",
+      "content": "Content of the alarm 3",
+      "isRead": false
+    },
+    {
+      "id": 4,
+      "sender": "Sender 4",
+      "content": "Content of the alarm 4",
+      "isRead": true
+    },
+    {
+      "id": 5,
+      "sender": "Sender 5",
+      "content": "Content of the alarm 5",
+      "isRead": false
+    }
+    ],
+  "alarms": [
+    {
+      "image": "http://via.placeholder.com/400x400",
+      "title": "Alarm 1",
+      "scheduleInfo": "Everyday 8:00"
+    },
+    {
+      "image": "http://via.placeholder.com/400x400",
+      "title": "Alarm 2",
+      "scheduleInfo": "Everyday 8:00"
+    },
+    {
+      "image": "http://via.placeholder.com/400x400",
+      "title": "Alarm 3",
+      "scheduleInfo": "Everyday 8:00"
+    },
+    {
+      "image": "http://via.placeholder.com/400x400",
+      "title": "Alarm 4",
+      "scheduleInfo": "Everyday 8:00"
+    },
+    {
+      "image": "http://via.placeholder.com/400x400",
+      "title": "Alarm 5",
+      "scheduleInfo": "Everyday 8:00"
+    }
+  ],
+  "groups": [
+    {
+      "id": "id1",
+      "name": "Family",
+      "image": "http://via.placeholder.com/400x400",
+      "members": [
+        {
+          "id": "kim123",
+          "name": "Kim",
+          "image": "http://via.placeholder.com/400x400",
+          "phone": "010-1234-5678"
+        },
+        {
+          "id": "lee123",
+          "name": "Lee",
+          "image": "http://via.placeholder.com/400x400",
+          "phone": "010-1234-5678"
+        },
+        {
+          "id": "park123",
+          "name": "Park",
+          "image": "http://via.placeholder.com/400x400",
+          "phone": "010-1234-5678"
+        }
+      ]
+    },
+    {
+      "id": "id2",
+      "name": "Friends",
+      "image": "http://via.placeholder.com/400x400",
+      "members": [
+        {
+          "id": "kim123",
+          "name": "Kim",
+          "image": "http://via.placeholder.com/400x400",
+          "phone": "010-1234-5678"
+        },
+        {
+          "id": "lee123",
+          "name": "Lee",
+          "image": "http://via.placeholder.com/400x400",
+          "phone": "010-1234-5678"
+        },
+        {
+          "id": "park123",
+          "name": "Park",
+          "image": "http://via.placeholder.com/400x400",
+          "phone": "010-1234-5678"
+        }
+      ]
+    }
+  ]
+}
