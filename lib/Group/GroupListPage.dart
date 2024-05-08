@@ -53,7 +53,6 @@ class _GroupListPageState extends State<GroupListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: BackButton(),
         title: TextField(
           onChanged: (value) {
             searchNotifier.value = value;
