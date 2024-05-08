@@ -1,5 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'dart:math';
+
+import '../Data/Group.dart';
 
 class NewGroupPage extends StatefulWidget {
   const NewGroupPage({Key? key}) : super(key: key);
@@ -23,8 +28,40 @@ class _NewGroupPageState extends State<NewGroupPage> {
   }
 
   Future<void> _createGroup() async {
-    // Implement your group creation process here
-    // For example, you can send a request to your server with the group name and image
+    try {
+      // Create a new group
+      var newGroup = Group(
+        id: _generateInvitationCode(), // Assuming this generates a unique ID
+        name: _groupNameController.text,
+        image: "http://via.placeholder.com/400x400", // Assuming _groupImage is of type NetworkImage
+        members: [], // Initially, the group has no members
+      );
+
+      // Convert the group to JSON
+      var json = newGroup;
+
+      // Send a POST request to the API endpoint
+      final response = await http.post(
+        Uri.parse('http://10.0.2.2:3001/groups'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(json),
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Group created successfully'),
+          ),
+        );
+        Navigator.pop(context);
+      } else {
+        throw Exception('Failed to create group : ${response.statusCode}');
+      }
+    } catch (e) {
+      print('An error occurred while creating the group: $e');
+    }
   }
 
   @override
@@ -65,6 +102,7 @@ class _NewGroupPageState extends State<NewGroupPage> {
                 ),
               ],
             ),
+
             Text(
               'Invitation Code: $_invitationCode',
               style: Theme.of(context).textTheme.headline4,
