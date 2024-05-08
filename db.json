@@ -31,61 +31,66 @@
   ],
   "notifications": [
     {
-      "id": 1,
+      "id": "1",
       "sender": "Kim",
       "content": "Dinner at 8",
       "isRead": false
     },
     {
-      "id": 2,
+      "id": "2",
       "sender": "Sender 2",
       "content": "Content of the alarm 2",
       "isRead": true
     },
     {
-      "id": 3,
+      "id": "3",
       "sender": "Sender 3",
       "content": "Content of the alarm 3",
       "isRead": false
     },
     {
-      "id": 4,
+      "id": "4",
       "sender": "Sender 4",
       "content": "Content of the alarm 4",
       "isRead": true
     },
     {
-      "id": 5,
+      "id": "5",
       "sender": "Sender 5",
       "content": "Content of the alarm 5",
       "isRead": false
     }
-    ],
+  ],
   "alarms": [
     {
       "image": "http://via.placeholder.com/400x400",
       "title": "Alarm 1",
-      "scheduleInfo": "Everyday 8:00"
+      "scheduleInfo": "Everyday 8:00",
+      "id": "9429"
     },
     {
       "image": "http://via.placeholder.com/400x400",
       "title": "Alarm 2",
-      "scheduleInfo": "Everyday 8:00"
+      "scheduleInfo": "Everyday 8:00",
+      "id": "2df8"
     },
     {
       "image": "http://via.placeholder.com/400x400",
       "title": "Alarm 3",
-      "scheduleInfo": "Everyday 8:00"
+      "scheduleInfo": "Everyday 8:00",
+      "id": "4728"
     },
     {
       "image": "http://via.placeholder.com/400x400",
       "title": "Alarm 4",
-      "scheduleInfo": "Everyday 8:00"
+      "scheduleInfo": "Everyday 8:00",
+      "id": "26ef"
     },
     {
       "image": "http://via.placeholder.com/400x400",
       "title": "Alarm 5",
-      "scheduleInfo": "Everyday 8:00"
+      "scheduleInfo": "Everyday 8:00",
+      "id": "681e"
     }
   ],
   "groups": [
@@ -138,6 +143,30 @@
           "phone": "010-1234-5678"
         }
       ]
+    },
+    {
+      "id": "790502",
+      "name": "NewGroup",
+      "image": "http://via.placeholder.com/400x400",
+      "members": []
+    },
+    {
+      "id": "260813",
+      "name": "NewGroup",
+      "image": "http://via.placeholder.com/400x400",
+      "members": []
+    },
+    {
+      "id": "989430",
+      "name": "NewGroup",
+      "image": "http://via.placeholder.com/400x400",
+      "members": []
+    },
+    {
+      "id": "058878",
+      "name": "NewGroup",
+      "image": "http://via.placeholder.com/400x400",
+      "members": []
     }
   ]
 }
