@@ -20,4 +20,13 @@ class Group {
       members: membersList,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'image': image,
+      'members': members.map((user) => user.toJson()).toList(),
+    };
+  }
 }

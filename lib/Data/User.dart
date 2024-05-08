@@ -7,12 +7,20 @@ class User {
   User({required this.id, required this.name, required this.phone, required this.image});
 
   factory User.fromJson(Map<String, dynamic> json) {
-    print('User.fromJson: $json');
     return User(
       id: json['id'],
       name: json['name'],
       phone: json['phone'],
       image: json['image'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'phone': phone,
+      'image': image,
+    };
   }
 }
