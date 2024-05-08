@@ -42,24 +42,6 @@ class _AlarmGeneratorState extends State<AlarmGenerator> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => GroupSelectionPage()),
-                        ).then((selectedGroup) {
-                          if (selectedGroup != null) {
-                            setState(() {
-                              this.selectedGroup = selectedGroup;
-                            });
-                          }
-                        });
-                      },
-                      child: Text('Select Group'),
-                    ),
-                    Text(
-                      selectedGroup != null ? 'Selected Group: ${selectedGroup!.name} (${selectedGroup!.id})' : 'No Group Selected',
-                    ),
                     Row(
                       children: [
                         Expanded(
@@ -149,6 +131,31 @@ class _AlarmGeneratorState extends State<AlarmGenerator> {
                         ),
                       ),
                     ),
+                    TextField(
+                      decoration: InputDecoration(
+                        labelText: 'Alarm Name',
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => GroupSelectionPage()),
+                        ).then((selectedGroup) {
+                          if (selectedGroup != null) {
+                            setState(() {
+                              this.selectedGroup = selectedGroup;
+                            });
+                          }
+                        });
+                      },
+                      child: Text('Select Group'),
+                    ),
+                    Text(
+                      selectedGroup != null ? 'Selected Group: ${selectedGroup!.name} (${selectedGroup!.id})' : 'No Group Selected',
+                    ),
+
+
 
                     ElevatedButton(
                       onPressed: () {
