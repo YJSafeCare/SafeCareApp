@@ -1,7 +1,11 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_provider/flutter_provider.dart';
 import 'package:safecare_app/Map/MainMapPage.dart';
+
+import '../Data/User.dart';
+import '../Data/UserModel.dart';
 
 class LoginPage extends StatelessWidget {
   // Define a controller for each text field
@@ -10,6 +14,7 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // UserModel userModel = Provider.of<UserModel>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text('Login Page'),
@@ -30,13 +35,15 @@ class LoginPage extends StatelessWidget {
               decoration: InputDecoration(
                 labelText: 'Password',
               ),
-              obscureText: true, // This will obscure text for password input
+              obscureText: true, // 비밀번호를 가리기 위해 사용
             ),
             ElevatedButton(
               onPressed: () {
                 String username = _usernameController.text;
                 String password = _passwordController.text;
-                if (login(username, password)) {
+                User? currentUser = login(username, password, context);
+                if (currentUser != null) {
+                  // userModel.setUser(currentUser);
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(builder: (context) => MainPage()),
@@ -57,15 +64,14 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  bool login(String username, String password) {
-    // TODO: Implement your authentication logic here
-    log('Username: $username');
-    log('Password: $password');
-
+  User? login(String username, String password, BuildContext context) {
+    User user = User(id: "temp", name: username, phone: "phone", image: "http://via.placeholder.com/400x400");
+    // Provider.of<UserModel>(context, listen: false).setUser(user);
+    
     // 일단은 유저네임이 비어있지 않다면 통과
     if (username.isEmpty) {
-      return false;
+      return null;
     }
-    return true;
+    return user;
   }
 }
