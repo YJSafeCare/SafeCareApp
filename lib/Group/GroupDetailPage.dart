@@ -21,6 +21,7 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
   @override
   void initState() {
     super.initState();
+    filteredUsers = widget.group.members;
     searchController.addListener(() {
       searchNotifier.value = searchController.text;
       setState(() {
@@ -48,12 +49,13 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
+            child: filteredUsers.isEmpty
+                ? Center(child: Text('No members in this group'))
+                : ListView.builder(
               itemCount: filteredUsers.length,
               itemBuilder: (context, index) {
                 return ListTile(
                   leading: CircleAvatar(
-                    //backgroundImage: NetworkImage('https://example.com/user_image.png'), // Replace with your user image URL
                     backgroundImage: null,
                   ),
                   title: Text(filteredUsers[index].name),
