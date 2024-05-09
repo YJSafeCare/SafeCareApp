@@ -88,7 +88,7 @@ class _GroupListPageState extends State<GroupListPage> {
                         MaterialPageRoute(
                           builder: (context) => GroupDetailPage(group: filteredGroups[index]),
                         ),
-                      );
+                      ).then((_) => fetchGroups());
                     },
                   ),
                 );
