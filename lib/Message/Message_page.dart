@@ -157,7 +157,7 @@ class _MessagePageState extends State<MessagePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Groups'),
+        title: Text('Messages'),
       ),
       body: ListView.builder(
         itemCount: groups.length,
