@@ -34,6 +34,7 @@ class _MainMapWidgetState extends State<MainMapWidget> {
   void initState() {
     super.initState();
     fetchLocations();
+    fetchMarkers();
   }
 
   Future<void> fetchLocations() async {
@@ -44,7 +45,6 @@ class _MainMapWidgetState extends State<MainMapWidget> {
       List<dynamic> data = jsonDecode(response.body);
       setState(() {
         locations = data;
-        markers = _buildMarkers(locations);
         circles = locations.map((location) => Circle(
           circleId: CircleId(location['id']),
           center: LatLng(location['latitude'], location['longitude']),
@@ -59,15 +59,30 @@ class _MainMapWidgetState extends State<MainMapWidget> {
     }
   }
 
-  Set<Marker> _buildMarkers(List<dynamic> locations) {
+  Future<void> fetchMarkers() async {
+    final response = await http.get(Uri.parse('${ApiConstants.API_URL}/markers'));
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = jsonDecode(response.body);
+      print("fetchMarkers");
+      print(data);
+      setState(() {
+        markers = _buildMarkers(data);
+      });
+    } else {
+      throw Exception('Failed to load markers');
+    }
+  }
+
+  Set<Marker> _buildMarkers(List<dynamic> _markers) {
     Set<Marker> markers = {};
 
-    for (var location in locations) {
+    for (var marker in _markers) {
       markers.add(
         Marker(
-          markerId: MarkerId(location['id']),
-          position: LatLng(location['latitude'], location['longitude']),
-          infoWindow: InfoWindow(title: location['locationName']),
+          markerId: MarkerId(marker['id']),
+          position: LatLng(marker['latitude'], marker['longitude']),
+          infoWindow: InfoWindow(title: marker['name']),
         ),
       );
     }
@@ -97,7 +112,7 @@ class _MainMapWidgetState extends State<MainMapWidget> {
     // 클릭된 서클 핸들링
     for (var circle in tappedCircles) {
       print('Handling tapped circle ${circle.circleId.value}');
-      var location = locations.firstWhere((location) => location.locationId == circle.circleId.value);
+      var location = locations.firstWhere((location) => location.id == circle.circleId.value);
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => LocationModificationPage(location: location)),
