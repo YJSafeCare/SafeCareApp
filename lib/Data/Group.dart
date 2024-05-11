@@ -10,7 +10,6 @@ class Group {
 
   factory Group.fromJson(Map<String, dynamic> json) {
     var membersJson = json['members'] as List;
-    print('membersJson: $membersJson');
     List<User> membersList = membersJson.map((item) => User.fromJson(Map<String, dynamic>.from(item))).toList();
 
     return Group(
