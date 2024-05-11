@@ -5,29 +5,44 @@ import 'package:safecare_app/Alarm/AlarmGenerator.dart';
 import 'package:safecare_app/Data/AlarmData.dart';
 
 class AlarmListPage extends StatefulWidget {
+  const AlarmListPage({Key? key}) : super(key: key);
+
   @override
-  _AlarmListPageState createState() => _AlarmListPageState();
+  State<AlarmListPage> createState() => _AlarmListPageState();
 }
 
 class _AlarmListPageState extends State<AlarmListPage> {
-  List<AlarmData> alarms = [];
+  List<Task> tasks = [];
+  List<Task> filteredTasks = [];
+  final searchController = TextEditingController();
+  final ValueNotifier<String> searchNotifier = ValueNotifier('');
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
     super.initState();
-    fetchAlarms();
+    fetchTasks();
+    searchController.addListener(() {
+      searchNotifier.value = searchController.text;
+    });
   }
 
-  Future<void> fetchAlarms() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:3001/alarms'));
+  Future<void> fetchTasks() async {
+    final response = await http.get(Uri.parse('http://10.0.2.2:3001/tasks'));
 
     if (response.statusCode == 200) {
       List<dynamic> data = jsonDecode(response.body);
       setState(() {
-        alarms = data.map((item) => AlarmData.fromJson(item)).toList();
+        tasks = data.map((item) => Task.fromJson(item)).toList();
+        filteredTasks = List.from(tasks);
       });
     } else {
-      throw Exception('Failed to load alarms');
+      throw Exception('Failed to load tasks');
     }
   }
 
@@ -35,20 +50,73 @@ class _AlarmListPageState extends State<AlarmListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Alarm List'),
+        leading: const BackButton(),
+        title: TextField(
+          onChanged: (value) {
+            searchNotifier.value = value;
+          },
+          controller: searchController,
+          decoration: const InputDecoration(
+            hintText: 'Search',
+            border: InputBorder.none,
+          ),
+        ),
       ),
-      body: ListView.builder(
-        itemCount: alarms.length,
-        itemBuilder: (context, index) {
-          return AlarmWidget(alarms[index]);
+      body: ValueListenableBuilder<String>(
+        valueListenable: searchNotifier,
+        builder: (context, value, child) {
+          filteredTasks = tasks
+              .where((task) => task.name.toLowerCase().contains(value.toLowerCase()))
+              .toList();
+          if (filteredTasks.isEmpty) {
+            return const Center(child: Text('No result found'));
+          } else {
+            return ListView.builder(
+              itemCount: filteredTasks.length,
+              itemBuilder: (context, index) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        filteredTasks[index].name, 
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    ExpansionTile(
+                      title: const Text('Alarm Details'),
+                      children: filteredTasks[index].alarm.map((alarm) {
+                        return ListTile(
+                          leading: Image.network(alarm.image), // Display the image
+                          title: Text(alarm.title),
+                          subtitle: Text('Schedule: ${alarm.scheduleInfo}'),
+                          trailing: Transform.scale(
+                            scale: 0.7,
+                            child: Switch(
+                              value: alarm.isActive,
+                              onChanged: (value) {
+                                setState(() {
+                                  alarm.isActive = value; // Update the active state of the alarm
+                                });
+                              },
+                            ),
+                          ),
+                        );
+                      }).toList(), // Closing parentheses added here
+                    ), // Closing parentheses added here
+                  ],
+                );
+              },
+            );
+          }
         },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navigate to the Add Alarm page
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AlarmGenerator()),
+            MaterialPageRoute(builder: (context) => const AlarmGenerator()),
           );
         },
         child: Icon(Icons.add),
