@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:safecare_app/Data/Group.dart';
 import 'package:safecare_app/Data/User.dart';
 
+import 'package:http/http.dart' as http;
+import 'package:safecare_app/constants.dart';
+
 class GroupDetailPage extends StatefulWidget {
   final Group group;
 
@@ -63,17 +66,43 @@ class _GroupDetailPageState extends State<GroupDetailPage> {
               },
             ),
           ),
-          TextButton(
-            onPressed: () {
-              // Quit group, TODO
-            },
-            child: Text('Quit Group'),
-            style: TextButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  // Quit group, TODO
+                },
+                child: Text('Quit Group'),
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.red,
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  deleteGroup(widget.group.id);
+                },
+                child: Text('Delete Group'),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
+
+  Future<void> deleteGroup(String groupId) async {
+    final response = await http.delete(Uri.parse('${ApiConstants.API_URL}/groups/$groupId'));
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Group deleted successfully'),
+        ),
+      );
+      Navigator.pop(context);
+    } else {
+      throw Exception('Failed to delete group: ${response.statusCode}');
+    }
+  }
 }
+
