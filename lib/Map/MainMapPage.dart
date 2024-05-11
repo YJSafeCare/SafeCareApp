@@ -43,19 +43,19 @@ class _MainPageState extends State<MainPage> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.notifications),
-            label: 'Home',
+            label: '알람',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.map_sharp),
-            label: 'Favorites',
+            label: '지도',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.group),
-            label: 'Search',
+            label: '그룹',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.chat),
-            label: 'Group',
+            label: '채팅',
           ),
         ],
         onTap: (value) {
