@@ -8,7 +8,8 @@ import 'dart:math' as Math;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-import '../Data/LocationData.dart';
+import '../Data/Location.dart';
+import '../constants.dart';
 
 class LocationAddPage extends StatefulWidget {
   const LocationAddPage({super.key});
@@ -46,7 +47,7 @@ class _LocationAddPageState extends State<LocationAddPage> {
   Future<void> sendDataToServer(LocationData data) async {
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:3001/locations'),
+        Uri.parse('${ApiConstants.API_URL}/locations'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -136,6 +137,7 @@ class _LocationAddPageState extends State<LocationAddPage> {
                   child: FloatingActionButton(
                     onPressed: () {
                       var data = LocationData(
+                        locationId: '',
                         locationName: _locationNameController.text,
                         center: _center,
                         radius: _radius,
@@ -145,6 +147,7 @@ class _LocationAddPageState extends State<LocationAddPage> {
                     child: Text('생성'),
                   ),
                 ),
+
               ],
             ),
           ),

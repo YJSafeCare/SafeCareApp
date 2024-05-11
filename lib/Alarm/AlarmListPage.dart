@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:safecare_app/Alarm/AlarmGenerator.dart';
-import 'package:safecare_app/Data/AlarmData.dart';
+import 'package:safecare_app/Data/Alarm.dart';
+
+import '../constants.dart';
 
 class AlarmListPage extends StatefulWidget {
   @override
@@ -19,7 +21,7 @@ class _AlarmListPageState extends State<AlarmListPage> {
   }
 
   Future<void> fetchAlarms() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:3001/alarms'));
+    final response = await http.get(Uri.parse('${ApiConstants.API_URL}/alarms'));
 
     if (response.statusCode == 200) {
       List<dynamic> data = jsonDecode(response.body);
