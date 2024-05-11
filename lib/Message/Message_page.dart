@@ -1,35 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:safecare_app/constants.dart';
 import 'dart:convert';
+import '../Data/Group.dart';
 import 'ChatPage.dart';
 
 class MessagePage extends StatefulWidget {
   @override
   _MessagePageState createState() => _MessagePageState();
-}
-
-class Group {
-  final String id;
-  final String name;
-  final List<Member> members;
-
-  Group({
-    required this.id,
-    required this.name,
-    required this.members,
-  });
-
-  factory Group.fromJson(Map<String, dynamic> json) {
-    List<dynamic> membersJson = json['members'];
-    List<Member> members =
-        membersJson.map((memberJson) => Member.fromJson(memberJson)).toList();
-
-    return Group(
-      id: json['id'],
-      name: json['name'],
-      members: members,
-    );
-  }
 }
 
 class Member {
@@ -60,7 +38,7 @@ class _MessagePageState extends State<MessagePage> {
 
   Future<void> fetchGroups() async {
     final response =
-        await http.get(Uri.parse('http://10.0.2.2:3001/groups'));
+        await http.get(Uri.parse('${ApiConstants.API_URL}/groups'));
 
     if (response.statusCode == 200) {
       List<dynamic> data = jsonDecode(response.body);
@@ -77,8 +55,8 @@ class _MessagePageState extends State<MessagePage> {
       context,
       MaterialPageRoute(
         builder: (context) => ChatPage(
-          groupName: group.name, // Memberikan nilai groupName
-          messages: [], // Memberikan nilai pesan sesuai kebutuhan
+          groupName: group.name,
+          messages: [],
         ),
       ),
     );
@@ -88,13 +66,13 @@ class _MessagePageState extends State<MessagePage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        String groupName = ''; // Variabel untuk menyimpan nama grup baru
+        String groupName = '';
 
         return AlertDialog(
           title: Text("Create a new group"),
           content: TextField(
             onChanged: (value) {
-              groupName = value; // Menyimpan nama grup dari input pengguna
+              groupName = value;
             },
             decoration: InputDecoration(hintText: "Enter group name"),
           ),
@@ -108,9 +86,6 @@ class _MessagePageState extends State<MessagePage> {
             TextButton(
               child: Text("Create"),
               onPressed: () {
-                // Lakukan tindakan untuk membuat grup baru di sini
-                // Misalnya, simpan nama grup ke server atau tambahkan ke daftar lokal
-                // Setelah itu, tutup dialog
                 _addGroupToServer(groupName);
                 Navigator.of(context).pop();
               },
@@ -122,33 +97,23 @@ class _MessagePageState extends State<MessagePage> {
   }
 
   void _addGroupToServer(String groupName) async {
-    // Lakukan tindakan untuk menambahkan grup baru ke server
-    // Misalnya, kirim permintaan HTTP POST ke endpoint server
-    // dengan data grup yang ingin dibuat
-    // Setelah permintaan berhasil, perbarui daftar grup dengan yang baru
-    // Implementasi ini tergantung pada arsitektur server Anda
-    // Contoh:
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:3001/groups'),
+        Uri.parse('${ApiConstants.API_URL}/groups'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, String>{
           'name': groupName,
-          // Anda juga bisa menambahkan data tambahan lainnya jika diperlukan
         }),
       );
 
       if (response.statusCode == 200) {
-        // Jika permintaan berhasil, perbarui daftar grup dengan grup baru
         fetchGroups();
       } else {
-        // Jika permintaan gagal, tangani kesalahan sesuai kebutuhan aplikasi Anda
         throw Exception('Failed to create group');
       }
     } catch (error) {
-      // Tangani kesalahan jika terjadi
       print('Error creating group: $error');
     }
   }
@@ -166,13 +131,13 @@ class _MessagePageState extends State<MessagePage> {
           return ListTile(
             title: Text(group.name),
             subtitle: Text('${group.members.length} members'),
-            onTap: () => _navigateToChatPage(group), // Navigasi ke halaman chatting ketika item diklik
+            onTap: () => _navigateToChatPage(group),
           );
         },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          _createNewGroup(); // Panggil fungsi untuk membuat grup baru saat tombol ditekan
+          _createNewGroup();
         },
         child: Icon(Icons.add),
       ),

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:safecare_app/Alarm/AlarmListPage.dart';
 import 'package:safecare_app/Group/GroupListPage.dart';
 import 'package:safecare_app/Map/MainMapWidget.dart';
+import 'package:safecare_app/Message/Message_page.dart';
+
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
