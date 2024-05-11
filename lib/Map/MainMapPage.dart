@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:safecare_app/Alarm/AlarmListPage.dart';
+import 'package:safecare_app/Alarm/TaskListPage.dart';
 import 'package:safecare_app/Group/GroupListPage.dart';
 import 'package:safecare_app/Map/MainMapWidget.dart';
 import 'package:safecare_app/Message/Message_page.dart';
@@ -21,7 +21,7 @@ class _MainPageState extends State<MainPage> {
     Widget page;
     switch (selectedIndex) {
       case 0:
-        page = const AlarmListPage();
+        page = const TaskListPage();
         break;
       case 1:
         page = const MainMapWidget();

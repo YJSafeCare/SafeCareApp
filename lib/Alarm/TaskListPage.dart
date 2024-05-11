@@ -6,14 +6,14 @@ import 'package:safecare_app/Data/Alarm.dart';
 
 import '../constants.dart';
 
-class AlarmListPage extends StatefulWidget {
-  const AlarmListPage({Key? key}) : super(key: key);
+class TaskListPage extends StatefulWidget {
+  const TaskListPage({Key? key}) : super(key: key);
 
   @override
-  State<AlarmListPage> createState() => _AlarmListPageState();
+  State<TaskListPage> createState() => _TaskListPageState();
 }
 
-class _AlarmListPageState extends State<AlarmListPage> {
+class _TaskListPageState extends State<TaskListPage> {
   List<Task> tasks = [];
   List<Task> filteredTasks = [];
   final searchController = TextEditingController();
@@ -35,7 +35,7 @@ class _AlarmListPageState extends State<AlarmListPage> {
   }
 
   Future<void> fetchTasks() async {
-    final response = await http.get(Uri.parse('${ApiConstants.API_URL}/alarms'));
+    final response = await http.get(Uri.parse('${ApiConstants.API_URL}/tasks'));
 
     if (response.statusCode == 200) {
       List<dynamic> data = jsonDecode(response.body);

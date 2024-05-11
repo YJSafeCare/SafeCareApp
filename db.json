@@ -3,30 +3,37 @@
     {
       "id": "2",
       "locationName": "asda",
-      "latitude": 35.89585209682725,
-      "longitude": 128.62188633531332,
+      "latitude": 35.895978,
+      "longitude": 128.621933,
       "radius": 284
     },
     {
       "id": "efe9",
       "locationName": "aaaa",
-      "latitude": 35.89585209682725,
-      "longitude": 128.62188633531332,
-      "radius": 26
+      "latitude": 35.897392,
+      "longitude": 128.622384,
+      "radius": 0
     },
     {
       "id": "66ea",
-      "locationName": "",
-      "latitude": 35.88119293094168,
-      "longitude": 128.62284924834967,
-      "radius": 31
+      "locationName": "me",
+      "latitude": 35.894186,
+      "longitude": 128.622039,
+      "radius": 0
     },
     {
       "id": "2023",
-      "locationName": "",
-      "latitude": 35.89037369785294,
-      "longitude": 128.6196493729949,
+      "locationName": "w",
+      "latitude": 35.897966,
+      "longitude": 128.626567,
       "radius": 277
+    },
+    {
+      "id": "new",
+      "locationName": "hdf",
+      "latitude": 35.895098,
+      "longitude": 128.624686,
+      "radius": 0
     }
   ],
   "notifications": [
@@ -61,36 +68,48 @@
       "isRead": false
     }
   ],
-  "alarms": [
+  "tasks": [
     {
-      "image": "http://via.placeholder.com/400x400",
-      "title": "Alarm 1",
-      "scheduleInfo": "Everyday 8:00",
-      "id": "9429"
+      "id":"1a",
+      "name": "School",
+      "alarms": [
+        {
+          "image": "http://via.placeholder.com/400x400",
+          "title": "Alarm 1",
+          "scheduleInfo": "Everyday 8:00",
+          "id": "aaca"
+        },
+        {
+          "image": "http://via.placeholder.com/400x400",
+          "title": "Alarm 2",
+          "scheduleInfo": "Everyday 8:00",
+          "id": "60cd"
+        },
+        {
+          "image": "http://via.placeholder.com/400x400",
+          "title": "Alarm 3",
+          "scheduleInfo": "Everyday 8:00",
+          "id": "e978"
+        }
+      ]
     },
     {
-      "image": "http://via.placeholder.com/400x400",
-      "title": "Alarm 2",
-      "scheduleInfo": "Everyday 8:00",
-      "id": "2df8"
-    },
-    {
-      "image": "http://via.placeholder.com/400x400",
-      "title": "Alarm 3",
-      "scheduleInfo": "Everyday 8:00",
-      "id": "4728"
-    },
-    {
-      "image": "http://via.placeholder.com/400x400",
-      "title": "Alarm 4",
-      "scheduleInfo": "Everyday 8:00",
-      "id": "26ef"
-    },
-    {
-      "image": "http://via.placeholder.com/400x400",
-      "title": "Alarm 5",
-      "scheduleInfo": "Everyday 8:00",
-      "id": "681e"
+      "id":"1b",
+      "name": "Home",
+      "alarms": [
+        {
+          "image": "http://via.placeholder.com/400x400",
+          "title": "Alarm 4",
+          "scheduleInfo": "Everyday 8:00",
+          "id": "dd5b"
+        },
+        {
+          "image": "http://via.placeholder.com/400x400",
+          "title": "Alarm 5",
+          "scheduleInfo": "Everyday 8:00",
+          "id": "3672"
+        }
+      ]
     }
   ],
   "groups": [
