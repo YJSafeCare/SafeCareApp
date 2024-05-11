@@ -2,7 +2,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:safecare_app/Alarm/AlarmDetail/AlarmWithImage.dart';
 
-import 'AlarmDetail/MessagePage.dart';
+import 'AlarmDetail/AlarmWithMessagePage.dart';
 
 class FirebaseMessagingHandler {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -32,7 +32,7 @@ class FirebaseMessagingHandler {
           case 0:
             navigatorKey.currentState!.push(
               MaterialPageRoute(
-                builder: (context) => MessagePage(message: message),
+                builder: (context) => AlarmWithMessagePage(message: message),
               ),
             );
             break;
