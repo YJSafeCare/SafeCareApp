@@ -137,8 +137,8 @@ class _LocationAddPageState extends State<LocationAddPage> {
                   child: FloatingActionButton(
                     onPressed: () {
                       var data = LocationData(
-                        locationId: '',
-                        locationName: _locationNameController.text,
+                        id: '',
+                        name: _locationNameController.text,
                         center: _center,
                         radius: _radius,
                       );

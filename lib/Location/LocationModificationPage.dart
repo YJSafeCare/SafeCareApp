@@ -30,7 +30,7 @@ class _LocationModificationPageState extends State<LocationModificationPage> {
   @override
   void initState() {
     super.initState();
-    _locationNameController.text = widget.location.locationName;
+    _locationNameController.text = widget.location.name;
     _center = widget.location.center;
     _radius = widget.location.radius;
     _circles.add(Circle(
@@ -56,7 +56,7 @@ class _LocationModificationPageState extends State<LocationModificationPage> {
   Future<void> sendDataToServer(LocationData data) async {
     try {
       final response = await http.put(
-        Uri.parse('${ApiConstants.API_URL}/locations/${data.locationId}'),
+        Uri.parse('${ApiConstants.API_URL}/locations/${data.id}'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -72,9 +72,9 @@ class _LocationModificationPageState extends State<LocationModificationPage> {
         );
 
         setState(() {
-          _circles.removeWhere((circle) => circle.circleId.value == widget.location.locationId);
+          _circles.removeWhere((circle) => circle.circleId.value == widget.location.id);
           _circles.add(Circle(
-            circleId: CircleId(data.locationId!),
+            circleId: CircleId(data.id!),
             center: data.center,
             radius: data.radius,
             fillColor: Colors.blue.withOpacity(0.3),
@@ -95,7 +95,7 @@ class _LocationModificationPageState extends State<LocationModificationPage> {
   Future<void> deleteLocation() async {
     try {
       final response = await http.delete(
-        Uri.parse('${ApiConstants.API_URL}/locations/${widget.location.locationId}'),
+        Uri.parse('${ApiConstants.API_URL}/locations/${widget.location.id}'),
       );
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
@@ -106,7 +106,7 @@ class _LocationModificationPageState extends State<LocationModificationPage> {
           ),
         );
         setState(() {
-          _circles.removeWhere((circle) => circle.circleId.value == widget.location.locationId);
+          _circles.removeWhere((circle) => circle.circleId.value == widget.location.id);
         });
         Navigator.pop(context);
       }
@@ -184,8 +184,8 @@ class _LocationModificationPageState extends State<LocationModificationPage> {
                   child: FloatingActionButton(
                     onPressed: () {
                       var data = LocationData(
-                        locationId: widget.location.locationId,
-                        locationName: _locationNameController.text,
+                        id: widget.location.id,
+                        name: _locationNameController.text,
                         center: _center,
                         radius: _radius,
                       );
