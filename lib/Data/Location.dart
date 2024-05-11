@@ -1,11 +1,13 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class LocationData {
+  final String? locationId;
   final String locationName;
   final LatLng center;
   final double radius;
 
-  LocationData({
+  LocationData( {
+    this.locationId,
     required this.locationName,
     required this.center,
     required this.radius,
@@ -19,6 +21,7 @@ class LocationData {
   };
 
   factory LocationData.fromJson(Map<String, dynamic> json) => LocationData(
+    locationId: json['id'],
     locationName: json['locationName'],
     center: LatLng(json['latitude'], json['longitude']),
     radius: json['radius'].toDouble(),
