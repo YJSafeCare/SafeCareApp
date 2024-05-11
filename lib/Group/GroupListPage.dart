@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:safecare_app/Data/Group.dart';
 import 'dart:convert';
+import '../constants.dart';
 import 'GroupDetailPage.dart';
 import 'NewGroupPage.dart';
 
@@ -36,7 +37,7 @@ class _GroupListPageState extends State<GroupListPage> {
   }
 
   Future<void> fetchGroups() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:3001/groups'));
+    final response = await http.get(Uri.parse('${ApiConstants.API_URL}/groups'));
 
     if (response.statusCode == 200) {
       List<dynamic> data = jsonDecode(response.body);
