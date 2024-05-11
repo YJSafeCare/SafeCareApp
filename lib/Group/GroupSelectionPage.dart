@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import '../Data/Group.dart';
+import '../constants.dart';
 
 class GroupSelectionPage extends StatefulWidget {
   @override
@@ -19,7 +20,7 @@ class _GroupSelectionPageState extends State<GroupSelectionPage> {
   }
 
   Future<void> fetchGroups() async {
-    final response = await http.get(Uri.parse('http://10.0.2.2:3001/groups'));
+    final response = await http.get(Uri.parse('${ApiConstants.API_URL}/groups'));
 
     if (response.statusCode == 200) {
       List<dynamic> data = jsonDecode(response.body);

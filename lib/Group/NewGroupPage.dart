@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:math';
 
 import '../Data/Group.dart';
+import '../constants.dart';
 
 class NewGroupPage extends StatefulWidget {
   const NewGroupPage({Key? key}) : super(key: key);
@@ -34,7 +35,7 @@ class _NewGroupPageState extends State<NewGroupPage> {
         id: _generateInvitationCode(), // Assuming this generates a unique ID
         name: _groupNameController.text,
         image: "http://via.placeholder.com/400x400", // Assuming _groupImage is of type NetworkImage
-        members: [], // Initially, the group has no members
+        members: [],
       );
 
       // Convert the group to JSON
@@ -42,7 +43,7 @@ class _NewGroupPageState extends State<NewGroupPage> {
 
       // Send a POST request to the API endpoint
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:3001/groups'),
+        Uri.parse('${ApiConstants.API_URL}/groups'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
