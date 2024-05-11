@@ -5,6 +5,8 @@ import 'package:safecare_app/Group/GroupListPage.dart';
 import 'package:safecare_app/Map/MainMapWidget.dart';
 
 class MainPage extends StatefulWidget {
+  const MainPage({super.key});
+
   @override
   State<MainPage> createState() => _MainPageState();
 }
@@ -17,16 +19,16 @@ class _MainPageState extends State<MainPage> {
     Widget page;
     switch (selectedIndex) {
       case 0:
-        page = AlarmListPage();
+        page = const AlarmListPage();
         break;
       case 1:
-        page = MainMapWidget();
+        page = const MainMapWidget();
         break;
       case 2:
-        page = GroupListPage();
+        page = const GroupListPage();
         break;
       case 3:
-        page = Placeholder();
+        page = MessagePage();
       default:
         throw UnimplementedError('No page for index $selectedIndex');
     }

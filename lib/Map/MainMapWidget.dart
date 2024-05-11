@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +25,8 @@ class _MainMapWidgetState extends State<MainMapWidget> {
   late GoogleMapController mapController;
   final LatLng _center = const LatLng(35.8958520, 128.6218865);
 
-  List<LocationData> locations = [];
+  List<dynamic> locations = [];
+  Set<Marker> markers = {};
   Set<Circle> circles = {};
 
   @override
@@ -42,11 +42,12 @@ class _MainMapWidgetState extends State<MainMapWidget> {
     if (response.statusCode == 200) {
       List<dynamic> data = jsonDecode(response.body);
       setState(() {
-        locations = data.map((item) => LocationData.fromJson(item)).toList();
+        locations = data;
+        markers = _buildMarkers(locations);
         circles = locations.map((location) => Circle(
-          circleId: CircleId(location.locationId!),
-          center: location.center,
-          radius: location.radius,
+          circleId: CircleId(location['id']),
+          center: LatLng(location['latitude'], location['longitude']),
+          radius: location['radius'].toDouble(),
           fillColor: Colors.blue.withOpacity(0.3),
           strokeColor: Colors.blue,
           strokeWidth: 1,
@@ -55,6 +56,22 @@ class _MainMapWidgetState extends State<MainMapWidget> {
     } else {
       throw Exception('Failed to load locations');
     }
+  }
+
+  Set<Marker> _buildMarkers(List<dynamic> locations) {
+    Set<Marker> markers = {};
+
+    for (var location in locations) {
+      markers.add(
+        Marker(
+          markerId: MarkerId(location['id']),
+          position: LatLng(location['latitude'], location['longitude']),
+          infoWindow: InfoWindow(title: location['locationName']),
+        ),
+      );
+    }
+
+    return markers;
   }
 
   double calculateDistance(LatLng point1, LatLng point2) {
@@ -96,26 +113,25 @@ class _MainMapWidgetState extends State<MainMapWidget> {
     return Container(
       child: Stack(
         children: [
-          Container(
-            child: GoogleMap(
-              onMapCreated: _onMapCreated,
-              initialCameraPosition: CameraPosition(
-                target: _center,
-                zoom: 16.0,
-              ),
-              circles: circles,
-              onTap: (LatLng latLng) {
-                List<Circle> tappedCircles = [];
-                for (var circle in circles) {
-                  double distanceInKm = calculateDistance(latLng, circle.center);
-                  double distanceInMeters = distanceInKm * 1000; // convert km to meters
-                  if (distanceInMeters <= circle.radius) {
-                    tappedCircles.add(circle);
-                  }
-                }
-                circlesOnTap(tappedCircles);
-              },
+          GoogleMap(
+            onMapCreated: _onMapCreated,
+            initialCameraPosition: CameraPosition(
+              target: _center,
+              zoom: 16.0,
             ),
+            markers: markers,
+            circles: circles,
+            onTap: (LatLng latLng) {
+              List<Circle> tappedCircles = [];
+              for (var circle in circles) {
+                double distanceInKm = calculateDistance(latLng, circle.center);
+                double distanceInMeters = distanceInKm * 1000; // convert km to meters
+                if (distanceInMeters <= circle.radius) {
+                  tappedCircles.add(circle);
+                }
+              }
+              circlesOnTap(tappedCircles);
+            },
           ),
           Positioned(
             width: 120,
@@ -125,11 +141,10 @@ class _MainMapWidgetState extends State<MainMapWidget> {
               padding: const EdgeInsets.all(4.0),
               child: ElevatedButton(
                 onPressed: () {
-                  // show location add screen
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const LocationAddPage()),
-                  ).then((_) => fetchLocations());
+                  );
                 },
                 child: Text('장소 추가'),
               ),
