@@ -7,12 +7,13 @@ import '../constants.dart';
 class AlarmHistoryPage extends StatelessWidget {
   const AlarmHistoryPage({super.key});
 
-  Future<List<Notification>> fetchNotifications() async {
-    final response = await http.get(Uri.parse('${ApiConstants.API_URL}/notifications'));
+  Future<List<AlarmHistory>> fetchNotifications() async {
+    final response = await http.get(Uri.parse('${ApiConstants.API_URL}/api/alarmHistory'));
 
     if (response.statusCode == 200) {
       List jsonResponse = json.decode(response.body);
-      return jsonResponse.map((item) => Notification.fromJson(item)).toList();
+      print(response.body);
+      return jsonResponse.map((item) => AlarmHistory.fromJson(item)).toList();
     } else {
       throw Exception('Failed to load notifications from the server');
     }
@@ -24,7 +25,7 @@ class AlarmHistoryPage extends StatelessWidget {
       appBar: AppBar(
         title: Text('Alarm History'),
       ),
-      body: FutureBuilder<List<Notification>>(
+      body: FutureBuilder<List<AlarmHistory>>(
         future: fetchNotifications(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -43,14 +44,23 @@ class AlarmHistoryPage extends StatelessWidget {
                         width: 80, // Adjust this value as needed
                         child: Text(notification.sender),
                       ),
-                      Expanded(
-                        child: Text(notification.content),
-                      ),
-                      Container(
-                        width: 50, // Adjust this value as needed
-                        child: Icon(notification.isRead ? Icons.mail : Icons.mail_outline),
+                      Column(
+                        children: [
+                          Text(notification.content),
+                          Text(
+                              notification.alarmTime.toString(),
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 12,
+                            )
+                          ),
+                        ],
                       ),
                     ],
+                  ),
+                  trailing: Container(
+                    width: 30, // Adjust this value as needed
+                    child: Icon(notification.isRead ? Icons.mail : Icons.mail_outline),
                   ),
                 );
               },
@@ -62,22 +72,25 @@ class AlarmHistoryPage extends StatelessWidget {
   }
 }
 
-class Notification {
+class AlarmHistory {
   final String sender;
   final String content;
+  final DateTime alarmTime;
   final bool isRead;
 
-  Notification({
+  AlarmHistory({
     required this.sender,
     required this.content,
+    required this.alarmTime,
     required this.isRead,
   });
 
-  factory Notification.fromJson(Map<String, dynamic> json) {
-    return Notification(
-      sender: json['sender'] ?? 'Default Sender',
-      content: json['content'] ?? 'Default Content',
-      isRead: json['isRead'] ?? false,
+  factory AlarmHistory.fromJson(Map<String, dynamic> json) {
+    return AlarmHistory(
+      sender: json['alarmContent']['alarm']['sender']['memberId'] ?? 'Default Sender',
+      content: json['alarmContent']['alarm']['alarmTitle'] ?? 'Default Content',
+      alarmTime: DateTime.parse(json['alarmTime']),
+      isRead: json['readStatus'] ?? false,
     );
   }
 }
