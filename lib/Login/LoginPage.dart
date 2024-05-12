@@ -65,13 +65,13 @@ class LoginPage extends StatelessWidget {
   }
 
   User? login(String username, String password, BuildContext context) {
-    User user = User(id: "temp", name: username, phone: "phone", image: "http://via.placeholder.com/400x400");
+    // User user = User(id: "temp", name: username, phone: "phone", image: "http://via.placeholder.com/400x400");
     // Provider.of<UserModel>(context, listen: false).setUser(user);
     
     // 일단은 유저네임이 비어있지 않다면 통과
     if (username.isEmpty) {
       return null;
     }
-    return user;
+    // return user;
   }
 }
