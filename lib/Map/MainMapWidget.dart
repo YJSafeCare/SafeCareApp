@@ -13,9 +13,7 @@ import '../Location/LocationModificationPage.dart';
 import '../Settings/SettingsPage.dart';
 import '../constants.dart';
 
-
 class MainMapWidget extends StatefulWidget {
-
   const MainMapWidget({super.key});
 
   @override
@@ -49,7 +47,7 @@ class _MainMapWidgetState extends State<MainMapWidget> {
           circleId: CircleId(location['id']),
           center: LatLng(location['latitude'], location['longitude']),
           radius: location['radius'].toDouble(),
-          fillColor: Colors.blue.withOpacity(0.3),
+          fillColor: Colors.blue.withOpacity(0.5),
           strokeColor: Colors.blue,
           strokeWidth: 1,
         )).toSet();
@@ -109,10 +107,10 @@ class _MainMapWidgetState extends State<MainMapWidget> {
   }
 
   void circlesOnTap(List<Circle> tappedCircles) {
-    // 클릭된 서클 핸들링
+    // Handle tapped circles
     for (var circle in tappedCircles) {
       print('Handling tapped circle ${circle.circleId.value}');
-      var location = locations.firstWhere((location) => location.id == circle.circleId.value);
+      var location = locations.firstWhere((location) => location['id'] == circle.circleId.value);
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => LocationModificationPage(location: location)),
@@ -162,7 +160,15 @@ class _MainMapWidgetState extends State<MainMapWidget> {
                     MaterialPageRoute(builder: (context) => const LocationAddPage()),
                   );
                 },
-                child: Text('장소 추가'),
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.resolveWith((states) {
+                    if (states.contains(MaterialState.pressed)) {
+                      return Colors.blue.withOpacity(0.7); // pressed state
+                    }
+                    return Colors.blue.withOpacity(0.5); // default state
+                  }),
+                ),
+                child: Text('장소 추가', style: TextStyle(color: Colors.white)),
               ),
             ),
           ),
@@ -176,7 +182,8 @@ class _MainMapWidgetState extends State<MainMapWidget> {
                   MaterialPageRoute(builder: (context) => SettingsPage()),
                 );
               },
-              child: Icon(Icons.settings),
+              backgroundColor: Colors.blue.withOpacity(0.7),
+              child: Icon(Icons.settings, color: Colors.white),
             ),
           ),
           Positioned(
@@ -189,7 +196,8 @@ class _MainMapWidgetState extends State<MainMapWidget> {
                   MaterialPageRoute(builder: (context) => AlarmHistoryPage()),
                 );
               },
-              child: Icon(Icons.alarm),
+              backgroundColor: Colors.blue.withOpacity(0.7),
+              child: Icon(Icons.alarm, color: Colors.white),
             ),
           ),
         ],

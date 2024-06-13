@@ -105,7 +105,8 @@ class _GroupListPageState extends State<GroupListPage> {
             MaterialPageRoute(builder: (context) => const NewGroupPage()), // Replace with your new group page
           );
         },
-        child: const Text('그룹 생성'),
+        child: const Text('그룹 생성', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.blue.withOpacity(0.7),
       ),
     );
   }

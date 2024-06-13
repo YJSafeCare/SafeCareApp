@@ -96,13 +96,17 @@ class _TaskListPageState extends State<TaskListPage> {
                           trailing: Transform.scale(
                             scale: 0.7,
                             child: Switch(
-                              value: alarm.isActive,
-                              onChanged: (value) {
-                                setState(() {
-                                  alarm.isActive = value; // Update the active state of the alarm
-                                });
-                              },
-                            ),
+                                value: alarm.isActive,
+                                onChanged: (value) {
+                                  setState(() {
+                                    alarm.isActive = value; // Update the active state of the alarm
+                                  });
+                                },
+                                activeColor: Colors.blue,
+                                inactiveThumbColor: Colors.white.withOpacity(0.6) , // Set the active color to blue
+                                inactiveTrackColor: Colors.blue.withOpacity(0.8) , // Set the active color to blue
+                                
+                              )
                           ),
                         );
                       }).toList(), // Closing parentheses added here
@@ -121,7 +125,8 @@ class _TaskListPageState extends State<TaskListPage> {
             MaterialPageRoute(builder: (context) => const AlarmGenerator()),
           );
         },
-        child: Icon(Icons.add),
+        backgroundColor: Colors.blue.withOpacity(0.7),
+        child: Icon(Icons.add, color: Colors.white),
       ),
     );
   }
