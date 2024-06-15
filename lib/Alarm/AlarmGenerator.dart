@@ -152,7 +152,7 @@ class _AlarmGeneratorState extends State<AlarmGenerator> {
                       child: Text('Select Group'),
                     ),
                     Text(
-                      selectedGroup != null ? 'Selected Group: ${selectedGroup!.name} (${selectedGroup!.id})' : 'No Group Selected',
+                      selectedGroup != null ? 'Selected Group: ${selectedGroup!.groupName} (${selectedGroup!.groupId})' : 'No Group Selected',
                     ),
 
 
