@@ -2,23 +2,29 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_provider/flutter_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'dart:math' as Math;
 import 'package:http/http.dart' as http;
+import 'package:safecare_app/Location/LocationCreateRequest.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 import '../Data/Location.dart';
+import '../Data/User.dart';
+import '../Data/UserModel.dart';
 import '../constants.dart';
 
-class LocationAddPage extends StatefulWidget {
+class LocationAddPage extends ConsumerStatefulWidget {
   const LocationAddPage({super.key});
 
   @override
   _LocationAddPageState createState() => _LocationAddPageState();
 }
 
-class _LocationAddPageState extends State<LocationAddPage> {
+class _LocationAddPageState extends ConsumerState<LocationAddPage> {
   late GoogleMapController mapController;
   double _radius = 1.0;
   final _locationNameController = TextEditingController();
@@ -34,6 +40,9 @@ class _LocationAddPageState extends State<LocationAddPage> {
     ),
   ]);
 
+  late UserModel userModel;
+  User? currentUser;
+
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
   }
@@ -44,7 +53,8 @@ class _LocationAddPageState extends State<LocationAddPage> {
     return zoomLevel;
   }
 
-  Future<void> sendDataToServer(LocationData data) async {
+  Future<void> addLocation(LocationCreateRequest data) async {
+    print(data.toJson());
     try {
       final response = await http.post(
         Uri.parse('${ApiConstants.API_URL}/locations'),
@@ -135,14 +145,16 @@ class _LocationAddPageState extends State<LocationAddPage> {
                   bottom: 20,
                   right: 20,
                   child: FloatingActionButton(
-                    onPressed: () {
-                      var data = LocationData(
-                        id: '',
-                        name: _locationNameController.text,
-                        center: _center,
-                        radius: _radius,
+                    onPressed: () async {
+                      var data = LocationCreateRequest(
+                        locationName: _locationNameController.text,
+                        locationLatitude: _center.latitude,
+                        locationLongitude: _center.longitude,
+                        locationRadius: _radius,
+                        groupId: 2,
+                        serial: ref.read(userModelProvider),
                       );
-                      sendDataToServer(data);
+                      addLocation(data);
                     },
                     child: Text('생성'),
                   ),
