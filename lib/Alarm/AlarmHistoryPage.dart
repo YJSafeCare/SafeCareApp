@@ -1,14 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+import '../Data/UserModel.dart';
 import '../constants.dart';
 
-class AlarmHistoryPage extends StatelessWidget {
+class AlarmHistoryPage extends ConsumerStatefulWidget {
   const AlarmHistoryPage({super.key});
 
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() => _AlarmHistoryPageState();
+}
+
+class _AlarmHistoryPageState extends ConsumerState<AlarmHistoryPage> {
   Future<List<AlarmHistory>> fetchNotifications() async {
-    final response = await http.get(Uri.parse('${ApiConstants.API_URL}/api/alarmHistory'));
+    final response = await http.get(
+        Uri.parse('${ApiConstants.API_URL}/api/alarmHistory'),
+        headers: <String, String>{
+          'Authorization': ref.read(userModelProvider.notifier).userToken,
+        }
+    );
 
     if (response.statusCode == 200) {
       List jsonResponse = json.decode(response.body);
@@ -42,7 +54,7 @@ class AlarmHistoryPage extends StatelessWidget {
                     children: [
                       Container(
                         width: 80, // Adjust this value as needed
-                        child: Text(notification.sender),
+                        child: Text(notification.sender.toString()),
                       ),
                       Column(
                         children: [
@@ -73,7 +85,7 @@ class AlarmHistoryPage extends StatelessWidget {
 }
 
 class AlarmHistory {
-  final String sender;
+  final int sender;
   final String content;
   final DateTime alarmTime;
   final bool isRead;
@@ -87,8 +99,8 @@ class AlarmHistory {
 
   factory AlarmHistory.fromJson(Map<String, dynamic> json) {
     return AlarmHistory(
-      sender: json['alarmContent']['alarm']['sender']['memberId'] ?? 'Default Sender',
-      content: json['alarmContent']['alarm']['alarmTitle'] ?? 'Default Content',
+      sender: json['historyId'] ?? 'Default Sender',
+      content: json['alarmContent']['body'] ?? 'Default Content',
       alarmTime: DateTime.parse(json['alarmTime']),
       isRead: json['readStatus'] ?? false,
     );
