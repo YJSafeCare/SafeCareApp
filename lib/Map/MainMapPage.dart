@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:safecare_app/Alarm/TaskListPage.dart';
+import 'package:safecare_app/Task/TaskListPage.dart';
 import 'package:safecare_app/Group/GroupListPage.dart';
 import 'package:safecare_app/Map/MainMapWidget.dart';
 import 'package:safecare_app/Message/Message_page.dart';
@@ -46,8 +46,8 @@ class _MainPageState extends State<MainPage> {
         backgroundColor: Colors.black,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
-            label: '알람',
+            icon: Icon(Icons.task_alt),
+            label: '할 일',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.map_sharp),
