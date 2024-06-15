@@ -1,4 +1,4 @@
-package com.example.safecare_app
+package com.yju.safecare
 
 import io.flutter.embedding.android.FlutterActivity
 
