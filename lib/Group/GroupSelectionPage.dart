@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import '../Data/Group.dart';
+import '../Data/UserModel.dart';
 import '../constants.dart';
 
-class GroupSelectionPage extends StatefulWidget {
+class GroupSelectionPage extends ConsumerStatefulWidget {
   @override
-  _GroupSelectionPageState createState() => _GroupSelectionPageState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _GroupSelectionPageState();
 }
 
-class _GroupSelectionPageState extends State<GroupSelectionPage> {
+class _GroupSelectionPageState extends ConsumerState<ConsumerStatefulWidget> {
   List<Group> groups = [];
 
   @override
@@ -20,7 +22,12 @@ class _GroupSelectionPageState extends State<GroupSelectionPage> {
   }
 
   Future<void> fetchGroups() async {
-    final response = await http.get(Uri.parse('${ApiConstants.API_URL}/groups'));
+    final response = await http.get(
+        Uri.parse('${ApiConstants.API_URL}/api/groups'),
+        headers: <String, String>{
+          'Authorization': ref.read(userModelProvider.notifier).userToken,
+        }
+    );
 
     if (response.statusCode == 200) {
       List<dynamic> data = jsonDecode(response.body);
@@ -42,7 +49,7 @@ class _GroupSelectionPageState extends State<GroupSelectionPage> {
         itemCount: groups.length,
         itemBuilder: (context, index) {
           return ListTile(
-            title: Text(groups[index].name),
+            title: Text(groups[index].groupName),
             onTap: () {
               // Return the selected group
               Navigator.pop(context, groups[index]);

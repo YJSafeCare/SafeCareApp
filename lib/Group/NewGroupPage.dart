@@ -1,54 +1,51 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:safecare_app/Group/GroupCreateRequest.dart';
 import 'dart:math';
 
 import '../Data/Group.dart';
+import '../Data/UserModel.dart';
 import '../constants.dart';
 
-class NewGroupPage extends StatefulWidget {
+class NewGroupPage extends ConsumerStatefulWidget {
   const NewGroupPage({Key? key}) : super(key: key);
 
   @override
-  _NewGroupPageState createState() => _NewGroupPageState();
+  ConsumerState<NewGroupPage> createState() => _NewGroupPageState();
 }
 
-class _NewGroupPageState extends State<NewGroupPage> {
+class _NewGroupPageState extends ConsumerState<NewGroupPage> {
   TextEditingController _groupNameController = TextEditingController();
-  String _invitationCode = _generateInvitationCode();
-  ImageProvider? _groupImage;
+  TextEditingController _groupDescriptionController = TextEditingController();
 
-  static String _generateInvitationCode() {
-    return List.generate(6, (index) => Random().nextInt(10).toString()).join();
-  }
-
-  Future<void> _selectGroupImage() async {
-    // Implement your image selection process here
-    // For example, you can use the image_picker package from pub.dev
-  }
-
-  Future<void> _createGroup() async {
+  Future<void> _createGroup(BuildContext context, WidgetRef ref) async {
     try {
       // Create a new group
-      var newGroup = Group(
-        id: _generateInvitationCode(), // Assuming this generates a unique ID
-        name: _groupNameController.text,
-        image: "http://via.placeholder.com/400x400", // Assuming _groupImage is of type NetworkImage
-        members: [],
+      var groupCreateRequest = GroupCreateRequest(
+        groupName: _groupNameController.text,
+        groupDescription: _groupDescriptionController.text,
+        serial: ref.read(userModelProvider),
       );
 
+      print('Group name: ${groupCreateRequest.groupName}');
+
       // Convert the group to JSON
-      var json = newGroup;
+      var json = groupCreateRequest.toJson();
 
       // Send a POST request to the API endpoint
       final response = await http.post(
-        Uri.parse('${ApiConstants.API_URL}/groups'),
+        Uri.parse('${ApiConstants.API_URL}/api/groups'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': ref.read(userModelProvider.notifier).userToken,
         },
         body: jsonEncode(json),
       );
+
+      print('Response status code: ${response.statusCode}');
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -69,48 +66,39 @@ class _NewGroupPageState extends State<NewGroupPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('New Group Page'),
+        title: const Text('새 그룹 생성'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                GestureDetector(
-                  onTap: _selectGroupImage,
-                  child: Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.rectangle,
-                      image: DecorationImage(
-                        image: _groupImage ?? NetworkImage("http://via.placeholder.com/400x400"), // Replace with your default group image
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
+            Container(
+              width: 300, // Adjust as needed
+              child: TextField(
+                controller: _groupNameController,
+                decoration: InputDecoration(
+                  labelText: '그룹 이름',
+                  border: OutlineInputBorder(),
                 ),
-                SizedBox(width: 20), // Add some spacing between the image and the text field
-                Expanded(
-                  child: TextField(
-                    controller: _groupNameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Group Name',
-                    ),
-                  ),
+              ),
+            ),
+            SizedBox(height: 20), // Add some space between the fields
+            Container(
+              width: 300, // Adjust as needed
+              child: TextField(
+                controller: _groupDescriptionController,
+                decoration: InputDecoration(
+                  labelText: '그룹 설명',
+                  border: OutlineInputBorder(),
                 ),
-              ],
+              ),
             ),
-
-            Text(
-              'Invitation Code: $_invitationCode',
-              style: Theme.of(context).textTheme.headline4,
-            ),
+            SizedBox(height: 20), // Add some space between the field and the button
             ElevatedButton(
-              onPressed: _createGroup,
-              child: const Text('Make a Group'),
+              onPressed: () {
+                _createGroup(context, ref);
+              },
+              child: const Text('그룹 생성'),
             ),
           ],
         ),

@@ -1,25 +1,28 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:safecare_app/Data/Group.dart';
 import 'dart:convert';
+import '../Data/UserModel.dart';
 import '../constants.dart';
 import 'GroupDetailPage.dart';
 import 'NewGroupPage.dart';
 
-class GroupListPage extends StatefulWidget {
+class GroupListPage extends ConsumerStatefulWidget {
   const GroupListPage({Key? key}) : super(key: key);
 
   @override
-  State<GroupListPage> createState() => _GroupListPageState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _GroupListPageState();
 }
 
-class _GroupListPageState extends State<GroupListPage> {
+class _GroupListPageState extends ConsumerState<ConsumerStatefulWidget> {
   List<Group> groups = [];
   List<Group> filteredGroups = [];
   final searchController = TextEditingController();
   final ValueNotifier<String> searchNotifier = ValueNotifier('');
+
 
   @override
   void dispose() {
@@ -37,12 +40,20 @@ class _GroupListPageState extends State<GroupListPage> {
   }
 
   Future<void> fetchGroups() async {
-    final response = await http.get(Uri.parse('${ApiConstants.API_URL}/groups'));
-
+    final response = await http.get(
+        Uri.parse('${ApiConstants.API_URL}/api/groups'),
+        headers: <String, String>{
+          'Authorization': ref.read(userModelProvider.notifier).userToken,
+        }
+    );
+    print(response.body);
     if (response.statusCode == 200) {
-      List<dynamic> data = jsonDecode(response.body);
+      print(response.body);
+      Map<String, dynamic> data = jsonDecode(response.body);
       setState(() {
-        groups = data.map((item) => Group.fromJson(item)).toList();
+        groups = (data['content'] as List)
+            .map((item) => Group.fromJson(item))
+            .toList();
         filteredGroups = List.from(groups);
       });
     } else {
@@ -60,7 +71,7 @@ class _GroupListPageState extends State<GroupListPage> {
           },
           controller: searchController,
           decoration: InputDecoration(
-            hintText: 'Search',
+            hintText: '검색',
             border: InputBorder.none,
           ),
         ),
@@ -69,28 +80,43 @@ class _GroupListPageState extends State<GroupListPage> {
         valueListenable: searchNotifier,
         builder: (context, value, child) {
           filteredGroups = groups
-              .where((group) => group.name.toLowerCase().contains(value.toLowerCase()))
+              .where((group) => group.groupName.toLowerCase().contains(value.toLowerCase()))
               .toList();
           if (filteredGroups.isEmpty) {
-            return Center(child: Text('No result found'));
+            return Center(child: CircularProgressIndicator());
           } else {
             return ListView.builder(
               itemCount: filteredGroups.length,
               itemBuilder: (context, index) {
                 return Card(
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundImage: NetworkImage(filteredGroups[index].image),
-                    ),
-                    title: Text(filteredGroups[index].name),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => GroupDetailPage(group: filteredGroups[index]),
+                  elevation: 5,
+                  margin: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  child: Container(
+                    decoration: BoxDecoration(color: Colors.white),
+                    child: ListTile(
+                      contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      leading: Container(
+                        padding: EdgeInsets.only(right: 12),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            right: BorderSide(width: 1, color: Colors.grey),
+                          ),
                         ),
-                      ).then((_) => fetchGroups());
-                    },
+                        child: Icon(Icons.group, color: Colors.blue),
+                      ),
+                      title: Text(
+                        filteredGroups[index].groupName,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => GroupDetailPage(group: filteredGroups[index]),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 );
               },
@@ -102,7 +128,7 @@ class _GroupListPageState extends State<GroupListPage> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const NewGroupPage()), // Replace with your new group page
+            MaterialPageRoute(builder: (context) => NewGroupPage()),
           );
         },
         child: const Text('그룹 생성'),
