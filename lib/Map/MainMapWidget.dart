@@ -1,30 +1,39 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:location/location.dart';
 import 'package:safecare_app/Location/LocationAddPage.dart';
 import 'package:http/http.dart' as http;
 import '../Alarm/AlarmHistoryPage.dart';
 import '../Data/Location.dart';
+import '../Data/UserModel.dart';
 import '../Location/LocationModificationPage.dart';
 import '../Settings/SettingsPage.dart';
 import '../constants.dart';
+import '../main.dart';
 
 
-class MainMapWidget extends StatefulWidget {
+class MainMapWidget extends ConsumerStatefulWidget {
 
   const MainMapWidget({super.key});
 
   @override
-  State<MainMapWidget> createState() => _MainMapWidgetState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _MainMapWidgetState();
 }
 
-class _MainMapWidgetState extends State<MainMapWidget> {
+class _MainMapWidgetState extends ConsumerState<MainMapWidget> {
   late GoogleMapController mapController;
-  final LatLng _center = const LatLng(35.8958520, 128.6218865);
+  LatLng _center = const LatLng(35.8958520, 128.6218865);
+
+  late Location location;
+  late StreamSubscription<LocationData> locationSubscription;
 
   List<dynamic> locations = [];
   Set<Marker> markers = {};
@@ -34,21 +43,89 @@ class _MainMapWidgetState extends State<MainMapWidget> {
   void initState() {
     super.initState();
     fetchLocations();
-    fetchMarkers();
+    // fetchMarkers();
+    initLocation();
+  }
+
+  void initLocation() async {
+    location = new Location();
+
+    bool _serviceEnabled;
+    PermissionStatus _permissionGranted;
+
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return;
+      }
+    }
+
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    locationSubscription = location.onLocationChanged.listen((LocationData currentLocation) {
+      // Use currentLocation
+      setState(() {
+        // Update the map with the new location
+        print('Location updated: ${currentLocation.latitude}, ${currentLocation.longitude}');
+        _center = LatLng(currentLocation.latitude!, currentLocation.longitude!);
+
+        for (var circle in circles) {
+          double distanceInKm = calculateDistance(_center, circle.center);
+          double distanceInMeters = distanceInKm * 1000; // convert km to meters
+          if (distanceInMeters <= circle.radius) {
+            // The current location is within the circle, send a notification
+            print('You are within a circle');
+            sendNotification('You are within a circle');
+          }
+        }
+      });
+    });
+  }
+
+  void sendNotification(String message) async {
+    return;
+    var androidPlatformChannelSpecifics = AndroidNotificationDetails(
+        'your channel id', 'your channel name',
+        importance: Importance.max, priority: Priority.high, showWhen: false);
+    var platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
+    await flutterLocalNotificationsPlugin.show(
+        0, 'New Message', 'Hello from Flutter', platformChannelSpecifics,
+        payload: 'item x');
+  }
+
+  @override
+  void dispose() {
+    if (locationSubscription != null) {
+      locationSubscription.cancel();
+    }
+    super.dispose();
   }
 
   Future<void> fetchLocations() async {
-    print('fetchLocations');
-    final response = await http.get(Uri.parse('${ApiConstants.API_URL}/locations'));
+    final response = await http.get(
+        Uri.parse('${ApiConstants.API_URL}/locations'),
+        headers: <String, String>{
+          'Authorization': ref.read(userModelProvider.notifier).userToken,
+        }
+    );
 
     if (response.statusCode == 200) {
-      List<dynamic> data = jsonDecode(response.body);
+      print(response.body);
+      Map<String, dynamic> data = jsonDecode(response.body);
+      List<dynamic> locationsList = data['content'];
       setState(() {
-        locations = data;
+        locations = locationsList;
         circles = locations.map((location) => Circle(
-          circleId: CircleId(location['id']),
-          center: LatLng(location['latitude'], location['longitude']),
-          radius: location['radius'].toDouble(),
+          circleId: CircleId(location['locationId'].toString()),
+          center: LatLng(location['locationLatitude'], location['locationLongitude']),
+          radius: location['locationRadius'].toDouble(),
           fillColor: Colors.blue.withOpacity(0.3),
           strokeColor: Colors.blue,
           strokeWidth: 1,
@@ -57,37 +134,6 @@ class _MainMapWidgetState extends State<MainMapWidget> {
     } else {
       throw Exception('Failed to load locations');
     }
-  }
-
-  Future<void> fetchMarkers() async {
-    final response = await http.get(Uri.parse('${ApiConstants.API_URL}/markers'));
-
-    if (response.statusCode == 200) {
-      List<dynamic> data = jsonDecode(response.body);
-      print("fetchMarkers");
-      print(data);
-      setState(() {
-        markers = _buildMarkers(data);
-      });
-    } else {
-      throw Exception('Failed to load markers');
-    }
-  }
-
-  Set<Marker> _buildMarkers(List<dynamic> _markers) {
-    Set<Marker> markers = {};
-
-    for (var marker in _markers) {
-      markers.add(
-        Marker(
-          markerId: MarkerId(marker['id']),
-          position: LatLng(marker['latitude'], marker['longitude']),
-          infoWindow: InfoWindow(title: marker['name']),
-        ),
-      );
-    }
-
-    return markers;
   }
 
   double calculateDistance(LatLng point1, LatLng point2) {
