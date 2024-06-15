@@ -2,6 +2,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:safecare_app/Alarm/FirebaseMessagingHandler.dart';
 
 import 'Login/LoginPage.dart';
@@ -40,7 +42,13 @@ void main() async {
 
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
-  runApp(MyApp(firebaseMessagingHandler: firebaseMessagingHandler));
+  await [Permission.notification].request();
+
+  runApp(
+      ProviderScope(
+        child: MyApp(firebaseMessagingHandler: firebaseMessagingHandler),
+      )
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -48,16 +56,18 @@ class MyApp extends StatelessWidget {
 
   const MyApp({super.key, required this.firebaseMessagingHandler});
 
+
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'SafeCare',
-      navigatorKey: firebaseMessagingHandler.navigatorKey,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: LoginPage(),
-    );
+        title: 'SafeCare',
+        navigatorKey: firebaseMessagingHandler.navigatorKey,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
+        ),
+        home: LoginPage(),
+      );
   }
 }
