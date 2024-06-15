@@ -29,7 +29,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:63621326662:android:b0cc77df5a7a541d94e747",
         "android_client_info": {
-          "package_name": "com.example.fluttertest"
+          "package_name": "com.yju.safecare"
         }
       },
       "oauth_client": [],
@@ -48,7 +48,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:63621326662:android:ec08a46986b224c094e747",
         "android_client_info": {
-          "package_name": "com.example.safecare_app"
+          "package_name": "com.yju.safecare"
         }
       },
       "oauth_client": [],
