@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:safecare_app/constants.dart';
 import 'dart:convert';
 import '../Data/Group.dart';
+import '../Data/UserModel.dart';
 import 'ChatPage.dart';
 
-class MessagePage extends StatefulWidget {
+class MessagePage extends ConsumerStatefulWidget {
   @override
-  _MessagePageState createState() => _MessagePageState();
+  ConsumerState<MessagePage> createState() => _MessagePageState();
 }
 
 class Member {
@@ -27,7 +29,7 @@ class Member {
   }
 }
 
-class _MessagePageState extends State<MessagePage> {
+class _MessagePageState extends ConsumerState<MessagePage> {
   List<Group> groups = [];
 
   @override
@@ -37,8 +39,11 @@ class _MessagePageState extends State<MessagePage> {
   }
 
   Future<void> fetchGroups() async {
-    final response =
-        await http.get(Uri.parse('${ApiConstants.API_URL}/groups'));
+    final response = await http.get(
+        Uri.parse('${ApiConstants.API_URL}/api/groups'),
+        headers: <String, String>{
+          'Authorization': ref.read(userModelProvider.notifier).userToken,
+        });
 
     if (response.statusCode == 200) {
       List<dynamic> data = jsonDecode(response.body);
@@ -55,7 +60,7 @@ class _MessagePageState extends State<MessagePage> {
       context,
       MaterialPageRoute(
         builder: (context) => ChatPage(
-          groupName: group.name,
+          groupName: group.groupName,
           messages: [],
         ),
       ),
@@ -128,11 +133,11 @@ class _MessagePageState extends State<MessagePage> {
         itemCount: groups.length,
         itemBuilder: (context, index) {
           Group group = groups[index];
-          return ListTile(
-            title: Text(group.name),
-            subtitle: Text('${group.members.length} members'),
-            onTap: () => _navigateToChatPage(group),
-          );
+          // return ListTile(
+          //   title: Text(group.name),
+          //   subtitle: Text('${group.members.length} members'),
+          //   onTap: () => _navigateToChatPage(group),
+          // );
         },
       ),
       floatingActionButton: FloatingActionButton(
