@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:safecare_app/Alarm/AlarmGenerator.dart';
-import 'package:safecare_app/Data/Alarm.dart';
+import 'package:safecare_app/Task/NewTaskPage.dart';
+import 'package:safecare_app/Alarm/Alarm.dart';
 
+import '../Data/UserModel.dart';
 import '../constants.dart';
+import 'Task.dart';
 
-class TaskListPage extends StatefulWidget {
+class TaskListPage extends ConsumerStatefulWidget {
   const TaskListPage({Key? key}) : super(key: key);
 
   @override
-  State<TaskListPage> createState() => _TaskListPageState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _TaskListPageState();
 }
 
-class _TaskListPageState extends State<TaskListPage> {
+class _TaskListPageState extends ConsumerState<TaskListPage> {
   List<Task> tasks = [];
   List<Task> filteredTasks = [];
   final searchController = TextEditingController();
@@ -35,16 +39,47 @@ class _TaskListPageState extends State<TaskListPage> {
   }
 
   Future<void> fetchTasks() async {
-    final response = await http.get(Uri.parse('${ApiConstants.API_URL}/tasks'));
+
+    final response = await http.get(
+      Uri.parse('${ApiConstants.API_URL}/task'),
+      headers: <String, String>{
+        'Authorization': ref.read(userModelProvider.notifier).userToken,
+      },
+    );
+
+    print(response.body);
 
     if (response.statusCode == 200) {
-      List<dynamic> data = jsonDecode(response.body);
+      String body = utf8.decode(response.bodyBytes);
+      List<dynamic> data = jsonDecode(body);
       setState(() {
         tasks = data.map((item) => Task.fromJson(item)).toList();
         filteredTasks = List.from(tasks);
       });
     } else {
       throw Exception('Failed to load alarms');
+    }
+  }
+
+  String translateCron(String cron) {
+    List<String> parts = cron.split(' ');
+    if (parts.length != 6) {
+      return 'Invalid cron expression';
+    }
+
+    int hour = int.tryParse(parts[2]) ?? -1;
+    if (hour < 0 || hour > 23) {
+      return 'Invalid hour in cron expression';
+    }
+
+    if (hour == 0) {
+      return '매일 자정';
+    } else if (hour < 12) {
+      return '매일 오전 $hour시';
+    } else if (hour == 12) {
+      return '매일 정오';
+    } else {
+      return '매일 오후 ${hour - 12}시';
     }
   }
 
@@ -59,7 +94,7 @@ class _TaskListPageState extends State<TaskListPage> {
           },
           controller: searchController,
           decoration: const InputDecoration(
-            hintText: 'Search',
+            hintText: '검색',
             border: InputBorder.none,
           ),
         ),
@@ -68,13 +103,14 @@ class _TaskListPageState extends State<TaskListPage> {
         valueListenable: searchNotifier,
         builder: (context, value, child) {
           filteredTasks = tasks
-              .where((task) => task.name.toLowerCase().contains(value.toLowerCase()))
+              .where((task) => task.taskTitle.toLowerCase().contains(value.toLowerCase()))
               .toList();
           if (filteredTasks.isEmpty) {
             return const Center(child: Text('No result found'));
           } else {
-            return ListView.builder(
+            return ListView.separated(
               itemCount: filteredTasks.length,
+              separatorBuilder: (context, index) => Divider(color: Colors.white, height: 20), // Adjust color and height as needed
               itemBuilder: (context, index) {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -82,31 +118,19 @@ class _TaskListPageState extends State<TaskListPage> {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
-                        filteredTasks[index].name,
+                        filteredTasks[index].taskTitle,
                         style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ),
                     ExpansionTile(
-                      title: const Text('Alarm Details'),
+                      title: const Text('알람 세부 일정'),
                       children: filteredTasks[index].alarm.map((alarm) {
                         return ListTile(
-                          leading: Image.network(alarm.image), // Display the image
-                          title: Text(alarm.title),
-                          subtitle: Text('Schedule: ${alarm.scheduleInfo}'),
-                          trailing: Transform.scale(
-                            scale: 0.7,
-                            child: Switch(
-                              value: alarm.isActive,
-                              onChanged: (value) {
-                                setState(() {
-                                  alarm.isActive = value; // Update the active state of the alarm
-                                });
-                              },
-                            ),
-                          ),
+                          title: Text(alarm.alarmTitle),
+                          subtitle: Text('일정: ${translateCron(alarm.cron)}'),
                         );
-                      }).toList(), // Closing parentheses added here
-                    ), // Closing parentheses added here
+                      }).toList(),
+                    ),
                   ],
                 );
               },
@@ -118,7 +142,7 @@ class _TaskListPageState extends State<TaskListPage> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => const AlarmGenerator()),
+            MaterialPageRoute(builder: (context) => const NewTaskPage()),
           );
         },
         child: Icon(Icons.add),
