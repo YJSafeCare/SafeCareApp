@@ -12,7 +12,7 @@ import '../Data/Location.dart';
 import '../constants.dart';
 
 class LocationModificationPage extends StatefulWidget {
-  final LocationData location;
+  final LocationDTO location;
 
   const LocationModificationPage({Key? key, required this.location}) : super(key: key);
 
@@ -53,7 +53,7 @@ class _LocationModificationPageState extends State<LocationModificationPage> {
     return zoomLevel;
   }
 
-  Future<void> sendDataToServer(LocationData data) async {
+  Future<void> sendDataToServer(LocationDTO data) async {
     try {
       final response = await http.put(
         Uri.parse('${ApiConstants.API_URL}/locations/${data.id}'),
@@ -183,11 +183,13 @@ class _LocationModificationPageState extends State<LocationModificationPage> {
                   right: 20,
                   child: FloatingActionButton(
                     onPressed: () {
-                      var data = LocationData(
+                      var data = LocationDTO(
                         id: widget.location.id,
                         name: _locationNameController.text,
                         center: _center,
                         radius: _radius,
+                        groupId: widget.location.groupId,
+                        serial: "1234",
                       );
                       sendDataToServer(data);
                     },
