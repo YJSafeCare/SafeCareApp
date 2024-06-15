@@ -1,16 +1,32 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'User.dart';
 
-class UserModel extends ChangeNotifier {
-  User? _currentUser;
+class UserModel extends StateNotifier<String> {
+  final Ref ref;
+  String _userToken = '';
 
-  User? get currentUser => _currentUser;
+  UserModel(this.ref) : super('');
 
-  UserModel({User? user}) : _currentUser = user;
-
-  void setUser(User user) {
-    _currentUser = user;
-    notifyListeners();
+  Future<void> login(String username) async {
+    state = username;
   }
+
+  // Get username
+  String get username => state;
+  set username(String username) {
+    state = username;
+  }
+
+  // Get user token
+  String get userToken => _userToken;
+  set userToken(String token) {
+    _userToken = token;
+  }
+
 }
+
+final userModelProvider = StateNotifierProvider<UserModel, String>((ref) {
+  return UserModel(ref);
+});

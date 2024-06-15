@@ -1,10 +1,10 @@
 class User {
-  final String serial;
-  final String memberId;
+  final String? serial;
+  final String? memberId;
   final String name;
-  final String email;
-  final String phone;
-  final String image;
+  final String? email;
+  final String? phone;
+  final String? image;
 
   User({
     required this.serial,
