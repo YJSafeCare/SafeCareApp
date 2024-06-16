@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:safecare_app/constants.dart';
+import 'package:stomp_dart_client/stomp_dart_client.dart';
 import 'dart:convert';
 import '../Data/Group.dart';
 import '../Data/UserModel.dart';
@@ -12,30 +13,41 @@ class MessagePage extends ConsumerStatefulWidget {
   ConsumerState<MessagePage> createState() => _MessagePageState();
 }
 
-class Member {
-  final String id;
-  final String name;
+class _MessagePageState extends ConsumerState<MessagePage> {
+  late StompClient stompClient;
+  List<Group> groups = [];
 
-  Member({
-    required this.id,
-    required this.name,
-  });
+  final TextEditingController _messageController = TextEditingController();
 
-  factory Member.fromJson(Map<String, dynamic> json) {
-    return Member(
-      id: json['id'],
-      name: json['name'],
+  void onConnect(StompClient stompClient, StompFrame frame) {
+    stompClient.subscribe(
+      destination: '/sub/location',
+      callback: (frame) {
+        print('Received: ${frame.body}');
+      },
     );
   }
-}
-
-class _MessagePageState extends ConsumerState<MessagePage> {
-  List<Group> groups = [];
 
   @override
   void initState() {
     super.initState();
-    fetchGroups();
+    // fetchGroups();
+
+    stompClient = StompClient(
+      config: StompConfig(
+          url: 'ws://10.0.2.2:80/ws-stomp',
+          onConnect: (frame) => onConnect(stompClient, frame),
+          beforeConnect: () async {
+            await Future.delayed(const Duration(milliseconds: 200));
+          },
+          onWebSocketError: (dynamic error) => print(error.toString()),
+        onWebSocketDone: () => print('web socket done'),
+        //stompConnectHeaders: {'Authorization': 'Bearer yourToken'},
+        //webSocketConnectHeaders: {'Authorization': 'Bearer yourToken'},
+      ),
+    );
+
+    stompClient.activate();
   }
 
   Future<void> fetchGroups() async {
@@ -127,25 +139,54 @@ class _MessagePageState extends ConsumerState<MessagePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Messages'),
+        title: Text('채팅'),
       ),
-      body: ListView.builder(
-        itemCount: groups.length,
-        itemBuilder: (context, index) {
-          Group group = groups[index];
-          // return ListTile(
-          //   title: Text(group.name),
-          //   subtitle: Text('${group.members.length} members'),
-          //   onTap: () => _navigateToChatPage(group),
-          // );
-        },
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: ListView.builder(
+              itemCount: groups.length,
+              itemBuilder: (context, index) {
+                Group group = groups[index];
+                // return ListTile(
+                //   title: Text(group.name),
+                //   subtitle: Text('${group.members.length} members'),
+                //   onTap: () => _navigateToChatPage(group),
+                // );
+              },
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            child: Row(
+              children: <Widget>[
+                Expanded(
+                  child: TextField(
+                    controller: _messageController,
+                    decoration: InputDecoration(hintText: "Enter message"),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.send),
+                  onPressed: () {
+                    stompClient.send(
+                      destination: '/pub/location',
+                      body: _messageController.text,
+                    );
+                    _messageController.clear();
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _createNewGroup();
-        },
-        child: Icon(Icons.add),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     _createNewGroup();
+      //   },
+      //   child: Icon(Icons.add),
+      // ),
     );
   }
 }
