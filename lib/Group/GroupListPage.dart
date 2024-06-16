@@ -33,7 +33,8 @@ class _GroupListPageState extends ConsumerState<ConsumerStatefulWidget> {
   @override
   void initState() {
     super.initState();
-    fetchGroups();
+    // fetchGroups();
+    groups = ref.read(userModelProvider.notifier).userGroups;
     searchController.addListener(() {
       searchNotifier.value = searchController.text;
     });
