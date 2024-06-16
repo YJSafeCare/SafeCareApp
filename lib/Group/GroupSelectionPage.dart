@@ -14,11 +14,15 @@ class GroupSelectionPage extends ConsumerStatefulWidget {
 
 class _GroupSelectionPageState extends ConsumerState<ConsumerStatefulWidget> {
   List<Group> groups = [];
+  List<bool> groupSelected = [];
+  List<List<bool>> memberSelected = [];
 
   @override
   void initState() {
     super.initState();
-    fetchGroups();
+    groups = ref.read(userModelProvider.notifier).userGroups;
+    groupSelected = List.filled(groups.length, false);
+    memberSelected = groups.map((group) => List.filled(group.memberSerial.length, false)).toList();
   }
 
   Future<void> fetchGroups() async {
@@ -43,19 +47,93 @@ class _GroupSelectionPageState extends ConsumerState<ConsumerStatefulWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Select a Group'),
+        title: Text('그룹 또는 멤버 선택'),
       ),
       body: ListView.builder(
         itemCount: groups.length,
         itemBuilder: (context, index) {
           return ListTile(
-            title: Text(groups[index].groupName),
-            onTap: () {
-              // Return the selected group
-              Navigator.pop(context, groups[index]);
-            },
+            title: Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      // Handle group selection
+                      print('Group selected: ${groups[index].groupName}');
+                    },
+                    child: Text(groups[index].groupName),
+                  ),
+                ),
+                Checkbox(
+                  value: groupSelected[index],
+                  onChanged: (bool? value) {
+                    setState(() {
+                      for (int i = 0; i < groupSelected.length; i++) {
+                        if (i == index) {
+                          groupSelected[i] = value!;
+                          memberSelected[i] = List.filled(groups[i].memberSerial.length, value);
+                        } else {
+                          groupSelected[i] = false;
+                          memberSelected[i] = List.filled(groups[i].memberSerial.length, false);
+                        }
+                      }
+                    });
+                  },
+                ),
+              ],
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: groups[index].memberSerial.asMap().entries.map((entry) {
+                int memberIndex = entry.key;
+                String member = entry.value;
+                return Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          // Handle member selection
+                          print('Member selected: $member');
+                        },
+                        child: Text(member),
+                      ),
+                    ),
+                    Checkbox(
+                      value: memberSelected[index][memberIndex],
+                      onChanged: (bool? value) {
+                        setState(() {
+                          memberSelected[index][memberIndex] = value!;
+                        });
+                      },
+                    ),
+                  ],
+                );
+              }).toList(),
+            ),
           );
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Handle confirmation of changes
+          print('Changes confirmed');
+          if (groupSelected.any((isSelected) => isSelected)) {
+            // If any group is selected, return the selected group
+            Navigator.pop(context, groups.where((group) => groupSelected[groups.indexOf(group)]).toList());
+          } else {
+            // Otherwise, return the selected members
+            List<String> selectedMembers = [];
+            for (int i = 0; i < groups.length; i++) {
+              for (int j = 0; j < groups[i].memberSerial.length; j++) {
+                if (memberSelected[i][j]) {
+                  selectedMembers.add(groups[i].memberSerial[j]);
+                }
+              }
+            }
+            Navigator.pop(context, selectedMembers);
+          }
+        },
+        child: Icon(Icons.check),
       ),
     );
   }
