@@ -11,6 +11,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:safecare_app/Location/LocationAddPage.dart';
 import 'package:http/http.dart' as http;
+import 'package:stomp_dart_client/stomp_dart_client.dart';
 import '../Alarm/AlarmHistoryPage.dart';
 import '../Data/Location.dart';
 import '../Data/UserModel.dart';
@@ -32,6 +33,8 @@ class _MainMapWidgetState extends ConsumerState<MainMapWidget> {
   late GoogleMapController mapController;
   LatLng _center = const LatLng(35.8958520, 128.6218865);
 
+  late StompClient stompClient;
+
   late Location location;
   late StreamSubscription<LocationData> locationSubscription;
 
@@ -43,8 +46,8 @@ class _MainMapWidgetState extends ConsumerState<MainMapWidget> {
   void initState() {
     super.initState();
     fetchLocations();
-    // fetchMarkers();
     initLocation();
+    setupStompClient();
   }
 
   void initLocation() async {
@@ -73,16 +76,29 @@ class _MainMapWidgetState extends ConsumerState<MainMapWidget> {
       // Use currentLocation
       setState(() {
         // Update the map with the new location
-        print('Location updated: ${currentLocation.latitude}, ${currentLocation.longitude}');
+        // print('Location updated: ${currentLocation.latitude}, ${currentLocation.longitude}');
         _center = LatLng(currentLocation.latitude!, currentLocation.longitude!);
+
+        if (stompClient.connected) {
+          stompClient.send(
+            destination: '/pub/location',
+            body: jsonEncode({
+              'userId': ref.read(userModelProvider.notifier).username,
+              'latitude': currentLocation.latitude,
+              'longitude': currentLocation.longitude,
+              'timestamp': DateTime.now().millisecondsSinceEpoch,
+            })
+          );
+        }
+
 
         for (var circle in circles) {
           double distanceInKm = calculateDistance(_center, circle.center);
           double distanceInMeters = distanceInKm * 1000; // convert km to meters
           if (distanceInMeters <= circle.radius) {
             // The current location is within the circle, send a notification
-            print('You are within a circle');
-            sendNotification('You are within a circle');
+            // print('You are within a circle');
+            // sendNotification('You are within a circle');
           }
         }
       });
@@ -110,7 +126,7 @@ class _MainMapWidgetState extends ConsumerState<MainMapWidget> {
 
   Future<void> fetchLocations() async {
     final response = await http.get(
-        Uri.parse('${ApiConstants.API_URL}/locations'),
+        Uri.parse('${ApiConstants.API_URL}/api/locations'),
         headers: <String, String>{
           'Authorization': ref.read(userModelProvider.notifier).userToken,
         }
@@ -134,6 +150,31 @@ class _MainMapWidgetState extends ConsumerState<MainMapWidget> {
     } else {
       throw Exception('Failed to load locations');
     }
+  }
+
+  void setupStompClient() {
+    stompClient = StompClient(
+      config: StompConfig(
+        url: 'ws://10.0.2.2:80/ws-stomp',
+        onConnect: (frame) => onConnect(stompClient, frame),
+        beforeConnect: () async {
+          await Future.delayed(const Duration(milliseconds: 200));
+        },
+        onWebSocketError: (dynamic error) => print(error.toString()),
+        onWebSocketDone: () => print('web socket done'),
+      ),
+    );
+
+    stompClient.activate();
+  }
+
+  void onConnect(StompClient stompClient, StompFrame frame) {
+    stompClient.subscribe(
+      destination: '/sub/location',
+      callback: (frame) {
+        print('Received: ${frame.body}');
+      },
+    );
   }
 
   double calculateDistance(LatLng point1, LatLng point2) {
