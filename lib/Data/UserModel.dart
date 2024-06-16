@@ -1,11 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'Group.dart';
 import 'User.dart';
 
 class UserModel extends StateNotifier<String> {
   final Ref ref;
   String _userToken = '';
+  String _userSerial = '';
+  List<Group> _userGroups = [];
 
   UserModel(this.ref) : super('');
 
@@ -23,6 +26,18 @@ class UserModel extends StateNotifier<String> {
   String get userToken => _userToken;
   set userToken(String token) {
     _userToken = token;
+  }
+
+  // Get user serial
+  String get userSerial => _userSerial;
+  set userSerial(String serial) {
+    _userSerial = serial;
+  }
+
+  // Get user groups
+  List<Group> get userGroups => _userGroups;
+  set userGroups(List<Group> groups) {
+    _userGroups = groups;
   }
 
 }
