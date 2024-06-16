@@ -31,7 +31,7 @@ class _InvitePageState extends ConsumerState<InvitePage> {
   Future<void> createInvite() async {
     final response = await http.post(
       Uri.parse('${ApiConstants.API_URL}/api/invite'),
-      headers: <String, String>{
+      headers: {
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': ref.read(userModelProvider.notifier).userToken,
       },
