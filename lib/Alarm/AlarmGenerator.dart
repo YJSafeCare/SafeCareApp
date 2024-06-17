@@ -1,25 +1,82 @@
 import 'dart:convert';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
-import 'package:safecare_app/Data/Group.dart';
+import 'package:safecare_app/Task/Task.dart';
 
-import '../Group/GroupSelectionPage.dart';
+import '../Data/UserModel.dart';
+import '../constants.dart';
 
-class AlarmGenerator extends StatefulWidget {
-  const AlarmGenerator({super.key});
+class AlarmGenerator extends ConsumerStatefulWidget {
+  final Task task;
+
+  const AlarmGenerator(this.task, {super.key});
 
   @override
-  State<AlarmGenerator> createState() => _AlarmGeneratorState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _AlarmGeneratorState(task);
 }
 
-class _AlarmGeneratorState extends State<AlarmGenerator> {
+class _AlarmGeneratorState extends ConsumerState<ConsumerStatefulWidget> {
   int _selectedHour = 0;
   int _selectedMinute = 0;
   List<bool> _selectedDays = List<bool>.filled(7, false);
+  String? _cronExpression;
+  String? _audioPath;
 
-  Group? selectedGroup;
+  final TextEditingController _alarmNameController = TextEditingController();
+
+  final Task task;
+
+  _AlarmGeneratorState(this.task);
+
+  dynamic _selectedGroupOrMembers;
+
+  Future<void> _createAlarm() async {
+    var request = http.MultipartRequest('POST', Uri.parse('${ApiConstants.API_URL}/alarm'));
+
+    request.headers.addAll({
+      'Authorization': ref.read(userModelProvider.notifier).userToken,
+    });
+
+    request.fields['cronExpression'] = _cronExpression!;
+    request.fields['alarmTitle'] = _alarmNameController.text;
+    request.fields['receiver'] = task.receiver.toString();
+    request.fields['taskId'] = task.taskId.toString();
+    request.fields['body'] = "hi";
+
+    if (_audioPath != null) {
+      request.files.add(await http.MultipartFile.fromPath(
+        'audio',
+        _audioPath!,
+      ));
+    }
+
+    var response = await request.send();
+
+    if (response.statusCode == 200) {
+      print('Uploaded!');
+    } else {
+      throw Exception('Failed to upload audio: ${response.statusCode}');
+    }
+  }
+
+  Future<void> _pickAudio() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['mp3', 'wav', 'm4a'],
+    );
+
+    if (result != null) {
+      setState(() {
+        _audioPath = result.files.single.path;
+      });
+    } else {
+      // User canceled the picker
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,139 +95,10 @@ class _AlarmGeneratorState extends State<AlarmGenerator> {
         body: TabBarView(
           children: [
             Center(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Container(
-                            color: Colors.transparent,
-                            height: 100.0,
-                            child: ListView.builder(
-                              itemCount: 24,
-                              itemBuilder: (BuildContext context, int index) {
-                                return GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _selectedHour = index;
-                                    });
-                                  },
-                                  child: Container(
-                                    height: 50.0,
-                                    color: _selectedHour == index ? Colors.blue : Colors.transparent,
-                                    child: Center(child: Text('$index')),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Container(
-                            height: 100.0,
-                            child: ListView.builder(
-                              itemCount: 60,
-                              itemBuilder: (BuildContext context, int index) {
-                                return GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _selectedMinute = index;
-                                    });
-                                  },
-                                  child: Container(
-                                    height: 50.0,
-                                    color: _selectedMinute == index ? Colors.blue : Colors.transparent,
-                                    child: Center(child: Text('$index')),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: List<Widget>.generate(
-                        7,
-                            (int index) => Flexible(
-                          child: Center(
-                            child: Container(
-                              width: 100,
-                              child: InkWell(
-                                onTap: () {
-                                  setState(() {
-                                    _selectedDays[index] = !_selectedDays[index];
-                                  });
-                                },
-                                child: ListTile(
-                                  title: Container(
-                                    decoration: _selectedDays[index]
-                                        ? BoxDecoration(
-                                        border: Border(
-                                          bottom: BorderSide(
-                                            color: Colors.blue,
-                                            width: 2.0,
-                                          ),
-                                        )
-                                    )
-                                        : null,
-                                    child: Text(
-                                      ['월', '화', '수', '목', '금', '토', '일'][index],
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    TextField(
-                      decoration: InputDecoration(
-                        labelText: 'Alarm Name',
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => GroupSelectionPage()),
-                        ).then((selectedGroup) {
-                          if (selectedGroup != null) {
-                            setState(() {
-                              this.selectedGroup = selectedGroup;
-                            });
-                          }
-                        });
-                      },
-                      child: Text('Select Group'),
-                    ),
-                    Text(
-                      selectedGroup != null ? 'Selected Group: ${selectedGroup!.groupName} (${selectedGroup!.groupId})' : 'No Group Selected',
-                    ),
-
-
-
-                    ElevatedButton(
-                      onPressed: () {
-                        String cronExpression = generateCronExpression();
-                        print(cronExpression);
-                      },
-                      child: Text('알림 생성'),
-                    ),
-                  ],
-                ),
-              ),
-              // Replace with your actual page for Type 1
+              child: tabContent(0)
             ),
             Center(
-              child: Text('Type 2 Page'),
+              child: tabContent(1),
               // Replace with your actual page for Type 2
             ),
           ],
@@ -179,7 +107,128 @@ class _AlarmGeneratorState extends State<AlarmGenerator> {
     );
   }
 
-  String generateCronExpression() {
+  Widget tabContent(int tabIndex) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  color: Colors.transparent,
+                  height: 100.0,
+                  child: ListView.builder(
+                    itemCount: 24,
+                    itemBuilder: (BuildContext context, int index) {
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedHour = index;
+                          });
+                        },
+                        child: Container(
+                          height: 50.0,
+                          color: _selectedHour == index ? Colors.blue : Colors.transparent,
+                          child: Center(child: Text('$index')),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  height: 100.0,
+                  child: ListView.builder(
+                    itemCount: 60,
+                    itemBuilder: (BuildContext context, int index) {
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedMinute = index;
+                          });
+                        },
+                        child: Container(
+                          height: 50.0,
+                          color: _selectedMinute == index ? Colors.blue : Colors.transparent,
+                          child: Center(child: Text('$index')),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (tabIndex == 0)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: List<Widget>.generate(
+              7,
+                  (int index) => Flexible(
+                child: Center(
+                  child: Container(
+                    width: 100,
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          _selectedDays[index] = !_selectedDays[index];
+                        });
+                      },
+                      child: ListTile(
+                        title: Container(
+                          decoration: _selectedDays[index]
+                              ? BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: Colors.blue,
+                                  width: 2.0,
+                                ),
+                              )
+                          )
+                              : null,
+                          child: Text(
+                            ['월', '화', '수', '목', '금', '토', '일'][index],
+                            style: TextStyle(
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          TextField(
+            controller: _alarmNameController,
+            decoration: InputDecoration(
+              labelText: 'Alarm Name',
+            ),
+          ),
+          ElevatedButton(
+            onPressed: _pickAudio,
+            child: Text('오디오 선택'),
+          ),
+          Text('수신자: ${task.receiver}')
+          ,
+          ElevatedButton(
+            onPressed: () {
+              _cronExpression = generateCronExpression(tabIndex);
+              print(_cronExpression);
+
+              _createAlarm();
+            },
+            child: Text('알림 생성'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String generateCronExpression(int tabIndex) {
     String daysOfWeek = _selectedDays
         .asMap()
         .entries
@@ -187,7 +236,17 @@ class _AlarmGeneratorState extends State<AlarmGenerator> {
         .map((entry) => (entry.key + 1).toString())
         .join(',');
 
-    return '0 $_selectedMinute $_selectedHour * * $daysOfWeek';
+    // Adjust the cron expression based on the tabIndex
+    if (tabIndex == 0) {
+      // For the first tab, generate the cron expression as before
+      return '0 $_selectedMinute $_selectedHour * * $daysOfWeek?';
+    } else if (tabIndex == 1) {
+      // For the second tab, generate an interval-based cron expression
+      return '0 0/$_selectedMinute * * * ?';
+    } else {
+      // For any other tabs, return a default cron expression
+      return '0 0 0 * * ?';
+    }
   }
 }
 

@@ -57,9 +57,10 @@ class _LocationAddPageState extends ConsumerState<LocationAddPage> {
     print(data.toJson());
     try {
       final response = await http.post(
-        Uri.parse('${ApiConstants.API_URL}/locations'),
+        Uri.parse('${ApiConstants.API_URL}/api/locations'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': ref.read(userModelProvider.notifier).userToken,
         },
         body: jsonEncode(data.toJson()),
       );
@@ -73,6 +74,8 @@ class _LocationAddPageState extends ConsumerState<LocationAddPage> {
         );
         Navigator.pop(context);
       }
+
+      print(response.statusCode);
     } on SocketException catch (e) {
       print('Failed to send data to server: $e');
     } catch (e) {
@@ -151,7 +154,7 @@ class _LocationAddPageState extends ConsumerState<LocationAddPage> {
                         locationLatitude: _center.latitude,
                         locationLongitude: _center.longitude,
                         locationRadius: _radius,
-                        groupId: 2,
+                        groupId: 1,
                         serial: ref.read(userModelProvider),
                       );
                       addLocation(data);
