@@ -20,7 +20,6 @@ Future<void> handleBackgroundMessage(RemoteMessage message) async {
   print('Message data: ${message.data}');
   String audioUrl = message.data['audio'];
   final player = AudioPlayer();
-  print(audioUrl);
-  await player.setUrl("https://yjp-safecare.s3.amazonaws.com//audiobba51a62-6a79-48b6-83c3-f3305f6aec59.mp3");
+  await player.setUrl(audioUrl);
   player.play();
 }
