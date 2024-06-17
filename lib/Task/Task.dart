@@ -6,7 +6,8 @@ class Task {
   final String imageUrl;
   final List<Alarm> alarm;
   final String sender;
-  final String receiver;
+  final dynamic receiver;
+  final bool isGroup;
 
   Task({
     required this.taskId,
@@ -15,6 +16,7 @@ class Task {
     required this.alarm,
     required this.sender,
     required this.receiver,
+    this.isGroup = false,
   });
 
   factory Task.fromJson(Map<String, dynamic> json) {
@@ -25,6 +27,7 @@ class Task {
       alarm: (json['alarm'] as List).map((item) => Alarm.fromJson(item)).toList(),
       sender: json['sender'],
       receiver: json['receiver'],
+      isGroup: json['isGroup'],
     );
   }
 }
