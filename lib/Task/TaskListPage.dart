@@ -106,7 +106,7 @@ class _TaskListPageState extends ConsumerState<TaskListPage> {
               .where((task) => task.taskTitle.toLowerCase().contains(value.toLowerCase()))
               .toList();
           if (filteredTasks.isEmpty) {
-            return const Center(child: Text('No result found'));
+            return const Center(child: Text('빈 할 일 리스트'));
           } else {
             return ListView.separated(
               itemCount: filteredTasks.length,
@@ -117,9 +117,24 @@ class _TaskListPageState extends ConsumerState<TaskListPage> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        filteredTasks[index].taskTitle,
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              filteredTasks[index].taskTitle,
+                              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.navigate_next),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => AlarmGenerator(filteredTasks[index])), // Replace NewPage with the actual page you want to navigate to
+                              );
+                            },
+                          ),
+                        ],
                       ),
                     ),
                     ExpansionTile(
