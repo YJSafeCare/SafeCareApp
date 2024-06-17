@@ -78,9 +78,11 @@ class _MyAppState extends ConsumerState<MyApp> {
 
     ref.read(userModelProvider.notifier).userSerial = '112031989079231654150';
     // ref.read(userModelProvider.notifier).username = '유저명';
-    ref.read(userModelProvider.notifier).userToken = 'eyJhbGciOiJIUzI1NiJ9.eyJzZXJpYWwiOiIxMTIwMzE5ODkwNzkyMzE2NTQxNTAiLCJyb2xlIjoiVVNFUiIsImNhdGVnb3J5IjoiYWNjZXNzIiwibmFtZSI6ImluaXgiLCJwcm92aWRlciI6Imdvb2dsZSIsImlhdCI6MTcxODUzNzMyMSwiZXhwIjoyMDAwMTcxODUzNzEyMX0.aG-nWQhStG0yCEfAXnuq1fIRF6-9YUwCMC2X2uruE48';
+    ref.read(userModelProvider.notifier).userToken = 'eyJhbGciOiJIUzI1NiJ9.eyJzZXJpYWwiOiIxMTIwMzE5ODkwNzkyMzE2NTQxNTAiLCJyb2xlIjoiVVNFUiIsImNhdGVnb3J5IjoiYWNjZXNzIiwibmFtZSI6ImluaXgiLCJwcm92aWRlciI6Imdvb2dsZSIsImlhdCI6MTcxODU5MDI5OCwiZXhwIjoyMDAwMTcxODU5MDA5OH0.Zy4OftqTcH_8yYsN0RRXLXVJgqdbAAOvPL5IsoXrjrc';
 
     fetchGroups();
+
+    FirebaseMessaging.instance.subscribeToTopic(ref.read(userModelProvider.notifier).userSerial);
   }
 
   Future<void> fetchGroups() async {
@@ -94,7 +96,12 @@ class _MyAppState extends ConsumerState<MyApp> {
       String responseBody = convert.utf8.decode(response.bodyBytes);
       List<Group> groups = jsonDecode(responseBody).map<Group>((group) => Group.fromJson(group)).toList();
       ref.read(userModelProvider.notifier).userGroups = groups;
+      print('group list');
       print(responseBody);
+
+      for (Group group in groups) {
+        FirebaseMessaging.instance.subscribeToTopic(group.groupId.toString());
+      }
     }
   }
 
