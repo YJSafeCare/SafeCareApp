@@ -48,6 +48,12 @@ void main() async {
   FirebaseMessagingHandler firebaseMessagingHandler = FirebaseMessagingHandler();
   await firebaseMessagingHandler.initializeFirebaseMessaging();
 
+  var initializationSettingsAndroid =
+  AndroidInitializationSettings('@mipmap/ic_launcher');
+  var initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid);
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
   await [Permission.notification].request();
