@@ -16,8 +16,8 @@ void handleForegroundMessage(RemoteMessage message) {
 }
 
 Future<void> handleBackgroundMessage(RemoteMessage message) async {
-  // print('Handling a background message: ${message.messageId}');
-  // print('Message data: ${message.data}');
+  print('Handling a background message: ${message.messageId}');
+  print('Message data: ${message.data}');
   String audioUrl = message.data['audio'];
   final player = AudioPlayer();
   await player.setUrl(audioUrl);
