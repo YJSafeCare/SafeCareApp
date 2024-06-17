@@ -52,7 +52,6 @@ class _NewTaskPageState extends ConsumerState<NewTaskPage> {
           _selectedGroupOrMembers = result;
         });
       }
-
     });
   }
 
@@ -73,10 +72,18 @@ class _NewTaskPageState extends ConsumerState<NewTaskPage> {
 
       request.fields['taskTitle'] = _titleController.text;
 
+      print(_selectedGroupOrMembers);
+
       if (_selectedGroupOrMembers is Group) { // 그룹인 경우
+        print((_selectedGroupOrMembers as Group).groupId);
         request.fields['receiverGroup'] = (_selectedGroupOrMembers as Group).groupId.toString();
         request.fields['isForGroup'] = 'true';
+      } else if (_selectedGroupOrMembers is List<Group>) { // 그룹 리스트인 경우
+        print(_selectedGroupOrMembers);
+        request.fields['receiverGroup'] = (_selectedGroupOrMembers[0] as Group).groupId.toString();
+        request.fields['isForGroup'] = 'true';
       } else if (_selectedGroupOrMembers is List<String>) { // 멤버 리스트인 경우
+        print(_selectedGroupOrMembers);
         request.fields['receiver'] = _selectedGroupOrMembers[0];
         request.fields['isForGroup'] = 'false';
       }
